@@ -1,0 +1,419 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   McCarthy design system.
+
+   Every token below was measured from the reference homepage in a real browser
+   (computed styles + bounding boxes at 1440 / 768 / 390), not eyeballed from a
+   screenshot. Components reference these utilities and never hard-code a
+   colour, size, radius or timing.
+   ========================================================================== */
+
+@theme {
+  /* ---- Breakpoints ------------------------------------------------------- */
+  --breakpoint-xxs: 20rem; /* 320 */
+  --breakpoint-xs: 23.4375rem; /* 375 */
+  --breakpoint-xm: 26.875rem; /* 430 */
+  --breakpoint-sm: 40rem; /* 640 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+  --breakpoint-2xl: 90rem; /* 1440 */
+  --breakpoint-3xl: 120rem; /* 1920 */
+
+  /* ---- Type families ----------------------------------------------------- */
+  --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body-face), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Surfaces ---------------------------------------------------------- */
+  --color-canvas: #ffffff;
+  --color-surface-warm: #f2f1ee; /* dominant secondary band */
+  --color-surface-cool: #eef1f1; /* recognition panel */
+  --color-surface-mist: #f9f9f9; /* promo split */
+  --color-surface-mint: #e4f4f1; /* connect band */
+  --color-surface-slate: #515151; /* dark recognition card */
+  --color-hairline: #e3e2df;
+
+  /* ---- Ink --------------------------------------------------------------- */
+  --color-ink: #3d3c3c;
+  --color-ink-strong: #29271f;
+  --color-ink-muted: #6d6d6d;
+  --color-ink-soft: #6e6854;
+  --color-ink-inverse: #ffffff;
+
+  /* ---- Brand ------------------------------------------------------------- */
+  --color-ember: #fb512f;
+  --color-ember-text: #ff462d;
+  --color-ember-deep: #d63b0a;
+  --color-link: #29707a;
+  --color-verde: #1fa452;
+  --color-verde-mid: #1b904b;
+  --color-verde-deep: #187e3f;
+  --color-verde-dark: #10592c;
+  --color-verde-bright: #4cdd84;
+  --color-verde-ink: #042315;
+
+  /* ---- Dark hero --------------------------------------------------------- */
+  --color-abyss: #04191d;
+  --color-abyss-deep: #010b0e;
+
+  /* ---- Type scale -------------------------------------------------------- */
+  /* Fluid between the measured mobile (390) and desktop (>=1024) values. */
+  --text-hero: clamp(2.5rem, 2.1925rem + 1.26vw, 3rem);
+  --text-hero--line-height: 1.1667;
+  --text-hero--letter-spacing: -0.01em;
+  --text-hero--font-weight: 300;
+
+  --text-break: clamp(2.75rem, 0.5rem + 9.5vw, 9rem);
+  --text-break--line-height: 0.75;
+  --text-break--letter-spacing: -0.01em;
+  --text-break--font-weight: 700;
+
+  --text-h2: clamp(2rem, 1.5rem + 1.9vw, 2.75rem);
+  --text-h2--line-height: 1.06;
+  --text-h2--letter-spacing: -0.005em;
+  --text-h2--font-weight: 400;
+
+  --text-h2-soft: clamp(1.875rem, 1.45rem + 1.6vw, 2.5rem);
+  --text-h2-soft--line-height: 1.15;
+  --text-h2-soft--letter-spacing: -0.005em;
+  --text-h2-soft--font-weight: 300;
+
+  --text-h3-xl: clamp(1.75rem, 1.35rem + 1.5vw, 2.5rem);
+  --text-h3-xl--line-height: 1.2;
+  --text-h3-xl--letter-spacing: -0.005em;
+  --text-h3-xl--font-weight: 300;
+
+  --text-h3-lg: clamp(1.625rem, 1.4rem + 0.85vw, 2.125rem);
+  --text-h3-lg--line-height: 1.176;
+  --text-h3-lg--letter-spacing: -0.005em;
+  --text-h3-lg--font-weight: 400;
+
+  --text-h3: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.005em;
+  --text-h3--font-weight: 300;
+
+  --text-h3-solid: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  --text-h3-solid--line-height: 1.06;
+  --text-h3-solid--letter-spacing: -0.005em;
+  --text-h3-solid--font-weight: 400;
+
+  --text-h4: clamp(1.5rem, 1.35rem + 0.55vw, 1.75rem);
+  --text-h4--line-height: 1.214;
+  --text-h4--font-weight: 400;
+
+  --text-card: 1.5rem;
+  --text-card--line-height: 1.25;
+  --text-card--letter-spacing: -0.005em;
+  --text-card--font-weight: 400;
+
+  --text-faq: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --text-faq--line-height: 1.4;
+  --text-faq--font-weight: 400;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-body--font-weight: 400;
+
+  --text-body-lg: 1.25rem;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1.5;
+  --text-eyebrow--letter-spacing: 0.06em;
+  --text-eyebrow--font-weight: 700;
+
+  --text-nav: 0.875rem;
+  --text-nav--line-height: 1.4286;
+
+  --text-legal: 0.875rem;
+  --text-legal--line-height: 1.4286;
+
+  /* ---- Radii ------------------------------------------------------------- */
+  --radius-control: 0.25rem; /* buttons, inputs — 4px */
+  --radius-bar: 0.5rem; /* floating header bar */
+  --radius-panel: 1rem; /* recognition band */
+  --radius-pill: 62.4375rem;
+
+  /* ---- Motion ------------------------------------------------------------ */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 620ms;
+  --duration-reveal: 900ms;
+
+  /* ---- Elevation --------------------------------------------------------- */
+  --shadow-bar: 0 2px 18px -6px rgb(0 0 0 / 0.35);
+  --shadow-tabs: 0 6px 24px -10px rgb(0 0 0 / 0.22);
+
+  /* ---- Animations -------------------------------------------------------- */
+  --animate-drift-slow: drift-slow 26s var(--ease-in-out-soft) infinite;
+  --animate-drift-slower: drift-slower 34s var(--ease-in-out-soft) infinite;
+  --animate-aurora: aurora 18s var(--ease-in-out-soft) infinite;
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-sheen: sheen 1.6s linear infinite;
+}
+
+/* ---- Layout constants ----------------------------------------------------- */
+:root {
+  /* Floating header bar: 16px inset, 60px tall (measured). */
+  --header-inset: 1rem;
+  --header-height: 3.75rem;
+  --header-band: calc(var(--header-height) + var(--header-inset) * 2);
+
+  /* Hero occupies ~89% of the viewport (804/900 measured). */
+  --hero-height: min(89svh, 50.25rem);
+
+  /* Container: 1376px of content inside a 1440px frame (measured — news cards
+     sit at x=32 and are 437px wide with 32px gaps at a 1440 viewport). */
+  --page-gutter: 1.25rem; /* 20px */
+  --page-max-width: 90rem; /* 1440px frame */
+
+  --section-py: 3.5rem;
+
+  /* Hero rhythm, measured at 1440x900: content bottom 621, dots top 767,
+     dots bottom 782, hero bottom 804. */
+  --hero-content-gap: 4.5rem;
+  --hero-dots-inset: 1.375rem;
+
+  /* Hero accent channel — each slide re-points these. */
+  --hero-accent: #2ee6a8;
+  --hero-accent-soft: #00c78c;
+  --hero-accent-deep: #04312c;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --page-gutter: 1.5rem; /* 24px */
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --page-gutter: 2rem; /* 32px */
+    --section-py: 5rem;
+    --hero-content-gap: 11.5rem; /* 184px */
+  }
+}
+
+/* Per-slide hero accents. */
+[data-accent='verde'] {
+  --hero-accent: #2ee6a8;
+  --hero-accent-soft: #00c78c;
+  --hero-accent-deep: #04312c;
+}
+
+[data-accent='ember'] {
+  --hero-accent: #ff8a5c;
+  --hero-accent-soft: #fb512f;
+  --hero-accent-deep: #3a1408;
+}
+
+[data-accent='azure'] {
+  --hero-accent: #6fc0ff;
+  --hero-accent-soft: #3ba0f0;
+  --hero-accent-deep: #071f38;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: auto; /* Lenis owns scrolling */
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-ink-inverse);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 3px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+@layer components {
+  .container-page {
+    margin-inline: auto;
+    width: 100%;
+    max-width: var(--page-max-width);
+    padding-inline: var(--page-gutter);
+  }
+
+  /* Eyebrow label with the reference's short rule beneath it. */
+  .eyebrow-rule::after {
+    content: '';
+    display: block;
+    width: 1.75rem;
+    height: 2px;
+    margin-top: 0.5rem;
+    background-color: var(--color-ember);
+  }
+
+  /* Inline text link — teal, with a chevron that nudges on hover. */
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--color-link);
+    transition: color var(--duration-base) var(--ease-out-quint);
+  }
+
+  .link-arrow:hover {
+    color: var(--color-ink);
+  }
+
+  /* Oversized ghost type used as a section break. */
+  .type-break {
+    font-family: var(--font-display);
+    text-transform: lowercase;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* Outlined numerals in the capability grid. */
+  .numeral-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--color-ember);
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  /* Pointer parallax channel for hero art. */
+  .parallax-layer {
+    transform: translate3d(
+      calc(var(--parallax-x, 0) * var(--parallax-depth, 1)),
+      calc(var(--parallax-y, 0) * var(--parallax-depth, 1)),
+      0
+    );
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+    will-change: transform;
+  }
+}
+
+/* ==========================================================================
+   Keyframes
+   ========================================================================== */
+
+@keyframes drift-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2.5%, 1.75%, 0) scale(1.07);
+  }
+}
+
+@keyframes drift-slower {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.04) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) scale(1) rotate(-1.5deg);
+  }
+}
+
+@keyframes aurora {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(-3%, -2%, 0) scale(1.12);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes sheen {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}

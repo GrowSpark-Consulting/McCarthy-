@@ -1,0 +1,38 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+.vscode/*
+!.vscode/extensions.json
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# testing
+/coverage
+
+# Scraped third-party source material — not referenced by any component, and two
+# files exceed GitHub's 100 MB hard limit. Kept on disk, kept out of the repo.
+/public/kyndryl-assets/

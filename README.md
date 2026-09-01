@@ -184,37 +184,33 @@ npm run dev
 | `npm run lint`      | ESLint                                   |
 | `npm run format`    | Prettier                                 |
 
-## 9. Hero video
+## 9. Video
 
-The hero plays `public/videos/hero-wave.mp4` (1920x1080, 20s, silent, 4.7 MB) as
-one continuous loop behind all three slides, so it never restarts when the copy
-rotates. It is declared in `src/content/hero-slides.ts`:
+Two silent loops, both with generated poster frames:
 
-```ts
-export const HERO_BACKGROUND: HeroMedia | undefined = {
-  videoSrc: '/videos/hero-wave.mp4',
-  posterSrc: '/videos/hero-wave-poster.jpg',
-};
-```
+| Slot                | File                               | Spec                   |
+| ------------------- | ---------------------------------- | ---------------------- |
+| Hero (top of page)  | `public/videos/hero-ai-office.mp4` | 1280x720, 11s, 4.2 MB  |
+| AI Lab feature band | `public/videos/wave-loop.mp4`      | 1920x1080, 20s, 4.7 MB |
 
-Set it to `undefined` and the hero falls back to the vector wave artwork with no
-other change.
+Declared in `src/content/hero-slides.ts` (`HERO_BACKGROUND`) and
+`src/content/homepage.ts` (`AI_LAB.feature.media`). Set either to `undefined`
+and that slot falls back to the vector wave artwork with no other change.
 
-Behaviour, in `components/sections/hero/hero-video.tsx`:
+Behaviour, in `components/shared/video-loop.tsx`:
 
-- The 37 KB poster frame carries the first paint; the video fades in only once
-  the browser reports `canplay`, so the LCP element is never 4.7 MB of video and
-  there is no black or half-decoded frame.
+- The poster frame carries the first paint; the video fades in only once the
+  browser reports `canplay`, so the LCP element is a small JPEG rather than
+  megabytes of video and no slot ever shows a black or half-decoded frame.
 - `preload="metadata"` keeps the payload off the critical path.
 - Muted + `playsInline` + `autoPlay` — the exact combination mobile browsers
   require to permit inline autoplay.
 - Under `prefers-reduced-motion` the video never plays; the poster is rendered
   through `next/image` instead.
-- Footage is left untinted. The per-slide accent glow applies only to the vector
-  fallback — washing teal footage with ember only muddies it, and the reference
-  runs the same untinted footage under every slide.
+- The hero's foot scrim is deepened so the slide dots stay legible over bright
+  footage.
 
-The poster was generated from frame 0.6s of the source video.
+Posters were generated from a mid-clip frame of each source.
 
 Recommended encode for replacements: H.264 MP4, 1920x1080, 6-20s seamless loop,
 **no audio track**, 2-4 Mbps, `-movflags +faststart`.

@@ -54,10 +54,11 @@ export function HeroBackdrop() {
         </div>
       )}
 
-      {/* Legibility scrims — heavier below lg, where the copy spans more width. */}
+      {/* Legibility scrims — heavier below lg where the copy spans more width,
+          and a deeper foot so the slide dots stay legible over bright footage. */}
       <div className="from-abyss-deep via-abyss-deep/72 to-abyss-deep/15 lg:from-abyss-deep/95 lg:via-abyss-deep/35 absolute inset-0 bg-gradient-to-r lg:to-transparent" />
       <div className="from-abyss-deep/80 absolute inset-x-0 top-0 h-36 bg-gradient-to-b to-transparent" />
-      <div className="from-abyss-deep/70 absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t to-transparent" />
+      <div className="from-abyss-deep/92 via-abyss-deep/45 absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t to-transparent" />
     </div>
   );
 }

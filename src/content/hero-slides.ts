@@ -8,8 +8,8 @@ import type { HeroMedia, HeroSlide } from '@/types/hero';
  * artwork with no other change.
  */
 export const HERO_BACKGROUND: HeroMedia | undefined = {
-  videoSrc: '/videos/hero-wave.mp4',
-  posterSrc: '/videos/hero-wave-poster.jpg',
+  videoSrc: '/videos/hero-ai-office.mp4',
+  posterSrc: '/videos/hero-ai-office-poster.jpg',
 };
 
 /**

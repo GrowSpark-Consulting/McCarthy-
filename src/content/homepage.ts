@@ -117,6 +117,11 @@ export const AI_LAB = {
     eyebrow: 'AI CEO Command Center',
     heading:
       'Executive intelligence that turns connected business data into decisions, risks and recommended actions',
+    /** Silent loop behind the full-bleed feature band. */
+    media: {
+      videoSrc: '/videos/wave-loop.mp4',
+      posterSrc: '/videos/wave-loop-poster.jpg',
+    },
     actions: [
       { label: 'Try the demo', href: '/ai-lab/ai-ceo-command-center' },
       { label: 'See all AI Lab systems', href: '/ai-lab' },
@@ -170,11 +175,6 @@ export const AI_NATIVE_PROMO = {
   heading: 'Unlock the power of being AI-native',
   body: 'AI-native organisations don’t just use more AI tools — they embed intelligence into the way work happens.',
   link: { label: 'See your AI-native advantage', href: '/about/ai-native' },
-  /** Silent 16:9 loop filling the reference's image slot. */
-  media: {
-    videoSrc: '/videos/ai-native.mp4',
-    posterSrc: '/videos/ai-native-poster.jpg',
-  },
 } as const;
 
 export interface Article {

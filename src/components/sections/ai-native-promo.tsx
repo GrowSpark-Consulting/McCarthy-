@@ -1,5 +1,5 @@
 import { ArrowLink } from '@/components/shared/arrow-link';
-import { VideoLoop } from '@/components/shared/video-loop';
+import { PlaceholderFrame } from '@/components/shared/placeholder-frame';
 import { AI_NATIVE_PROMO } from '@/content/homepage';
 
 /**
@@ -9,16 +9,15 @@ import { AI_NATIVE_PROMO } from '@/content/homepage';
  * a 34px/40px ember heading on the right, body copy capped around 820px, and an
  * arrow link. Sits on the pale `#f9f9f9` band.
  *
- * The slot holds a silent 16:9 loop rather than a still, matching the crop the
- * reference uses for its photograph.
+ * The reference uses a photograph of colleagues here. McCarthy has no verified
+ * team photography, so the slot is built at the same crop and marked as a
+ * placeholder.
  */
 export function AiNativePromo() {
   return (
     <section aria-labelledby="ai-native-heading" className="bg-surface-mist py-[var(--section-py)]">
       <div className="container-page grid items-center gap-8 lg:grid-cols-[minmax(0,437fr)_minmax(0,875fr)] lg:gap-16">
-        <div className="bg-surface-cool relative aspect-[16/9] w-full overflow-hidden">
-          <VideoLoop media={AI_NATIVE_PROMO.media} />
-        </div>
+        <PlaceholderFrame label="Team photography" className="aspect-[16/9]" />
 
         <div className="flex flex-col">
           <h2 id="ai-native-heading" className="text-h3-lg text-ember-text">

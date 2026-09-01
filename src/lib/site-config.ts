@@ -1,4 +1,31 @@
 /**
+ * Resolves the origin used for canonical URLs, Open Graph, the sitemap and
+ * robots.txt.
+ *
+ * Order of preference:
+ * 1. `NEXT_PUBLIC_SITE_URL` — set this to the real domain once it exists.
+ * 2. Vercel's own production URL, so preview and production deployments never
+ *    advertise `localhost` as their canonical origin.
+ * 3. Localhost, for development.
+ */
+function resolveSiteUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+
+  if (explicit) {
+    return explicit.replace(/\/$/, '');
+  }
+
+  const vercelHost =
+    process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL;
+
+  if (vercelHost) {
+    return `https://${vercelHost.replace(/\/$/, '')}`;
+  }
+
+  return 'http://localhost:3000';
+}
+
+/**
  * Global, environment-aware site metadata.
  *
  * The origin is read from `NEXT_PUBLIC_SITE_URL` rather than hard-coded: the
@@ -16,8 +43,8 @@ export const siteConfig = {
   titleTemplate: '%s | McCarthy',
   description:
     'AI strategy, agents, automation and workforce transformation — engineered around the way your business actually works.',
-  /** Absolute origin, no trailing slash. */
-  url: (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, ''),
+  /** Absolute origin, no trailing slash. See `resolveSiteUrl` below. */
+  url: resolveSiteUrl(),
   locale: 'en_SG',
   /** Operating locations, used in the organisation JSON-LD and the footer. */
   locations: ['Singapore', 'India'],

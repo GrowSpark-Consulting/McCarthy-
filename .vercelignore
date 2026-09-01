@@ -1,0 +1,8 @@
+node_modules
+.next
+
+# Scraped third-party source material: 277 MB, unused by any component.
+public/kyndryl-assets
+
+# Asset-download helpers, not part of the build.
+scripts

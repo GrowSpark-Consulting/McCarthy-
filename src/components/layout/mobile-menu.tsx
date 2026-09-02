@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
-import { motion } from 'framer-motion';
-import { ChevronRight, Search, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown, ChevronRight, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -29,10 +29,15 @@ interface MobileMenuProps {
  * The panel repeats the floating bar's geometry at the top so the wordmark
  * stays anchored and only the trigger appears to morph into a close button.
  * Loaded on demand, so it never ships in the desktop bundle.
+ *
+ * Items with a `megaMenu` (What we do, Who we are) expand in place into an
+ * accordion of their columns rather than opening the desktop panel, which
+ * would not fit — everything else is a direct link, same as before.
  */
 export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const [openLabel, setOpenLabel] = useState<string | null>(null);
 
   useOverlay({ containerRef, open: true, onClose });
 
@@ -77,12 +82,91 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
       >
         <nav aria-label="Primary" className="flex flex-col">
           {PRIMARY_NAV.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            if (item.megaMenu) {
+              const isOpen = openLabel === item.label;
+              const panelId = `mobile-megamenu-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+              return (
+                <motion.div key={item.label} variants={fadeUp} className="border-ink-inverse/12 border-b">
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={panelId}
+                    onClick={() => setOpenLabel(isOpen ? null : item.label)}
+                    className="group/link flex w-full items-center justify-between gap-4 py-5 text-left"
+                  >
+                    <span
+                      className={cn(
+                        'text-h3 font-light transition-colors duration-[var(--duration-base)]',
+                        isOpen ? 'text-ink-inverse' : 'text-ink-inverse/85 group-hover/link:text-ink-inverse',
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                    <ChevronDown
+                      aria-hidden="true"
+                      strokeWidth={1.5}
+                      className={cn(
+                        'text-ink-inverse/50 size-5 shrink-0 transition-transform duration-[var(--duration-base)]',
+                        isOpen && 'rotate-180',
+                      )}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen ? (
+                      <motion.div
+                        id={panelId}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: DURATION.base, ease: EASE.outQuint }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-6 pb-7">
+                          {item.megaMenu.columns.map((column) => (
+                            <div key={column.heading} className="flex flex-col gap-2.5">
+                              <p className="text-eyebrow text-ember-text uppercase">{column.heading}</p>
+                              <ul className="flex flex-col">
+                                {column.links.map((link) => (
+                                  <li key={link.href}>
+                                    <Link
+                                      href={link.href}
+                                      prefetch={PREFETCH_SITE_ROUTES}
+                                      onClick={onClose}
+                                      className="text-body text-ink-inverse/75 hover:text-ink-inverse block py-1.5 transition-colors duration-[var(--duration-base)]"
+                                    >
+                                      {link.label}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+
+                          <Link
+                            href={item.megaMenu.spotlight.link.href}
+                            prefetch={PREFETCH_SITE_ROUTES}
+                            onClick={onClose}
+                            className="text-body text-ink-inverse/60 hover:text-ink-inverse underline-offset-4 transition-colors duration-[var(--duration-base)] hover:underline"
+                          >
+                            {item.megaMenu.spotlight.link.label}
+                          </Link>
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            }
+
+            const href = item.href ?? '#';
+            const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
             return (
-              <motion.div key={item.href} variants={fadeUp}>
+              <motion.div key={href} variants={fadeUp}>
                 <Link
-                  href={item.href}
+                  href={href}
                   prefetch={PREFETCH_SITE_ROUTES}
                   onClick={onClose}
                   aria-current={isActive ? 'page' : undefined}

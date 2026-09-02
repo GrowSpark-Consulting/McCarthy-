@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Menu, Search } from 'lucide-react';
@@ -9,11 +9,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { HeaderNav } from '@/components/layout/header-nav';
+import { MegaMenu } from '@/components/layout/mega-menu';
 import { BrandWordmark } from '@/components/shared/brand-wordmark';
 import { ButtonLink } from '@/components/ui/button';
 import { useHeaderScrollState } from '@/hooks/use-header-scroll-state';
 import { DURATION, EASE } from '@/lib/motion';
-import { PREFETCH_SITE_ROUTES, PRIMARY_CTA } from '@/lib/navigation';
+import { getMegaMenuId, PREFETCH_SITE_ROUTES, PRIMARY_CTA, PRIMARY_NAV } from '@/lib/navigation';
 import { siteConfig } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
@@ -47,27 +48,83 @@ type ActiveOverlay = 'menu' | 'search' | null;
 export function SiteHeader() {
   const { isScrolled, isHidden } = useHeaderScrollState();
   const [activeOverlay, setActiveOverlay] = useState<ActiveOverlay>(null);
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const pathname = usePathname();
+  const barRef = useRef<HTMLDivElement>(null);
+  const megaMenuRef = useRef<HTMLDivElement>(null);
 
   const closeOverlay = useCallback(() => setActiveOverlay(null), []);
-  const openSearch = useCallback(() => setActiveOverlay('search'), []);
+  const closeMegaMenu = useCallback(() => setActiveMegaMenu(null), []);
+
+  const openSearch = useCallback(() => {
+    setActiveMegaMenu(null);
+    setActiveOverlay('search');
+  }, []);
+
+  const openMobileMenu = useCallback(() => {
+    setActiveMegaMenu(null);
+    setActiveOverlay('menu');
+  }, []);
+
+  const toggleMegaMenu = useCallback((id: string) => {
+    setActiveOverlay(null);
+    setActiveMegaMenu((previous) => (previous === id ? null : id));
+  }, []);
 
   useEffect(() => {
     setActiveOverlay(null);
+    setActiveMegaMenu(null);
   }, [pathname]);
+
+  // Outside click / Escape close the mega menu without the full modal
+  // machinery `useOverlay` gives the mobile menu and search — it's a
+  // dropdown, not a dialog, so focus should stay free.
+  useEffect(() => {
+    if (!activeMegaMenu) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (barRef.current?.contains(target) || megaMenuRef.current?.contains(target)) {
+        return;
+      }
+
+      setActiveMegaMenu(null);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setActiveMegaMenu(null);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeMegaMenu]);
 
   const isMenuOpen = activeOverlay === 'menu';
   const isSearchOpen = activeOverlay === 'search';
+  const activeMegaMenuItem = PRIMARY_NAV.find(
+    (item) => item.megaMenu && getMegaMenuId(item.label) === activeMegaMenu,
+  );
 
   return (
     <>
       <motion.header
         initial={{ y: '-140%' }}
-        animate={{ y: isHidden && activeOverlay === null ? '-140%' : '0%' }}
+        animate={{ y: isHidden && activeOverlay === null && activeMegaMenu === null ? '-140%' : '0%' }}
         transition={{ duration: DURATION.slow, ease: EASE.outExpo }}
         className="fixed inset-x-0 top-0 z-50 px-[var(--header-inset)] pt-[var(--header-inset)]"
       >
         <div
+          ref={barRef}
           className={cn(
             'mx-auto flex h-[var(--header-height)] max-w-[120rem] items-center gap-3',
             'rounded-[var(--radius-bar)] px-4 backdrop-blur-xl lg:px-6',
@@ -83,7 +140,11 @@ export function SiteHeader() {
             <BrandWordmark size="sm" tone="ember" />
           </Link>
 
-          <HeaderNav className="ml-6 hidden lg:flex xl:ml-9" />
+          <HeaderNav
+            className="ml-6 hidden lg:flex xl:ml-9"
+            activeMegaMenu={activeMegaMenu}
+            onToggleMegaMenu={toggleMegaMenu}
+          />
 
           <div className="ml-auto flex items-center gap-2">
             <ButtonLink
@@ -122,7 +183,7 @@ export function SiteHeader() {
               aria-expanded={isMenuOpen}
               aria-controls={MOBILE_MENU_ID}
               aria-haspopup="dialog"
-              onClick={() => setActiveOverlay('menu')}
+              onClick={openMobileMenu}
               className="border-ink-inverse/35 text-ink-inverse hover:border-ink-inverse hover:bg-ink-inverse/10 flex size-11 items-center justify-center rounded-full border transition-colors duration-[var(--duration-base)] lg:hidden"
             >
               <Menu aria-hidden="true" strokeWidth={1.75} className="size-[1.15rem]" />
@@ -130,6 +191,19 @@ export function SiteHeader() {
           </div>
         </div>
       </motion.header>
+
+      <AnimatePresence>
+        {activeMegaMenuItem?.megaMenu ? (
+          <MegaMenu
+            key={activeMegaMenu}
+            ref={megaMenuRef}
+            id={activeMegaMenu as string}
+            label={activeMegaMenuItem.label}
+            menu={activeMegaMenuItem.megaMenu}
+            onClose={closeMegaMenu}
+          />
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isMenuOpen ? (

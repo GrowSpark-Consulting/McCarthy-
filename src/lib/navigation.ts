@@ -1,48 +1,120 @@
-import type { NavCta, NavLink } from '@/types/navigation';
+import type { MegaMenu, NavCta, NavLink, PrimaryNavItem } from '@/types/navigation';
+
+/**
+ * Whether `next/link` may prefetch site routes.
+ *
+ * Only `/` exists in Phase 1; the remaining pages are delivered in later
+ * phases and will resolve without any change here.
+ */
+export const PREFETCH_SITE_ROUTES = false;
+
+const WHAT_WE_DO_MEGA_MENU: MegaMenu = {
+  columns: [
+    {
+      heading: 'Consulting services',
+      links: [
+        { label: 'Agentic modernization', href: '/agentic-modernization' },
+        { label: 'Business workflow transformation', href: '/business-workflow-transformation' },
+        { label: 'Cybersecurity', href: '/cybersecurity' },
+        { label: 'People and performance', href: '/people-and-performance' },
+      ],
+    },
+    {
+      heading: 'How we work',
+      links: [
+        { label: 'McCarthy Labs', href: '/ai-lab' },
+        { label: 'McCarthy Flow', href: '/mccarthy-flow' },
+        { label: 'The McCarthy Transformation System™️', href: '/about/transformation-system' },
+        { label: 'McCarthy Institute', href: '/mccarthy-institute' },
+      ],
+    },
+    {
+      heading: 'Technology services',
+      links: [
+        { label: 'Applications', href: '/applications' },
+        { label: 'Artificial intelligence and data', href: '/artificial-intelligence-and-data' },
+        { label: 'Cloud', href: '/cloud' },
+        { label: 'Cyber resilience', href: '/cyber-resilience' },
+        { label: 'Digital workplace', href: '/digital-workplace' },
+        { label: 'Mainframe', href: '/mainframe' },
+        { label: 'Networks', href: '/networks' },
+      ],
+    },
+    {
+      heading: 'Industries',
+      links: [
+        { label: 'Automotive', href: '/industries/automotive' },
+        { label: 'Banking and financial markets', href: '/industries/banking-and-financial-markets' },
+        { label: 'Chemical, Oil and Gas', href: '/industries/chemical-oil-and-gas' },
+        { label: 'Consumer and Retail', href: '/industries/consumer-and-retail' },
+        { label: 'Government', href: '/industries/government' },
+        { label: 'Healthcare', href: '/industries/healthcare' },
+        { label: 'Insurance', href: '/industries/insurance' },
+        { label: 'Manufacturing', href: '/industries/manufacturing' },
+        { label: 'Technology, Media and…', href: '/industries/technology-media' },
+        { label: 'Travel and Transportation', href: '/industries/travel-and-transportation' },
+        { label: 'Utilities', href: '/industries/utilities' },
+      ],
+    },
+  ],
+  spotlight: {
+    eyebrow: 'Spotlight',
+    title: 'Inside the McCarthy Transformation System™',
+    body: 'A published methodology, not a black box — Discover, Diagnose, Prioritise, Architect, Build, Adopt, Optimise.',
+    link: { label: 'See the Transformation System', href: '/about/transformation-system' },
+  },
+} as const;
+
+const WHO_WE_ARE_MEGA_MENU: MegaMenu = {
+  columns: [
+    {
+      heading: 'Our company',
+      links: [
+        { label: 'About us', href: '/about' },
+        { label: 'Alliances', href: '/about/alliances' },
+        { label: 'Leadership', href: '/about/leadership' },
+        { label: 'Locations', href: '/about/locations' },
+        { label: 'Trust', href: '/about/trust' },
+      ],
+    },
+    {
+      heading: 'Our impact',
+      links: [
+        { label: 'Customer stories', href: '/customer-stories' },
+        { label: 'News', href: '/news' },
+      ],
+    },
+    {
+      heading: 'Get involved',
+      links: [
+        { label: 'Careers', href: '/careers' },
+        { label: 'Contact us', href: '/contact' },
+      ],
+    },
+  ],
+  spotlight: {
+    eyebrow: 'Spotlight',
+    title: 'Where business understanding meets AI execution',
+    body: 'McCarthy exists to help organisations understand what AI makes possible, and turn that opportunity into systems, workflows and people capable of delivering real business outcomes.',
+    link: { label: 'Our story', href: '/about' },
+  },
+} as const;
 
 /**
  * Site information architecture — declared once, consumed by the desktop
  * header, the mobile menu and the search overlay.
  *
- * Routes point at their final paths. Only `/` exists in Phase 1; the remaining
- * pages are delivered in later phases and will resolve without any change here.
+ * "What we do" and "Who we are" are mega-menu triggers rather than plain
+ * links; "Insights", "News" and "Careers" route directly and carry no
+ * dropdown.
  */
-export const PRIMARY_NAV: readonly NavLink[] = [
-  {
-    label: 'AI Solutions',
-    href: '/ai-solutions',
-    description: 'AI agents, automation, applications and knowledge systems.',
-  },
-  {
-    label: 'AI Workforce',
-    href: '/ai-workforce',
-    description: 'Training, governance and embedding AI into everyday work.',
-  },
-  {
-    label: 'AI Lab',
-    href: '/ai-lab',
-    description: 'Interactive demonstrations of real AI systems — not slideware.',
-  },
-  {
-    label: 'Industries',
-    href: '/industries',
-    description: 'Where AI creates measurable value, sector by sector.',
-  },
-  {
-    label: 'About',
-    href: '/about',
-    description: 'Who McCarthy is and how the Transformation System works.',
-  },
+export const PRIMARY_NAV: readonly PrimaryNavItem[] = [
+  { label: 'What we do', megaMenu: WHAT_WE_DO_MEGA_MENU },
+  { label: 'Who we are', megaMenu: WHO_WE_ARE_MEGA_MENU },
+  { label: 'Insights', href: '/insights' },
+  { label: 'News', href: '/news' },
+  { label: 'Careers', href: '/careers' },
 ] as const;
-
-/**
- * Whether `next/link` may prefetch site routes.
- *
- * The destinations above ship phase by phase. Until they exist, Next would
- * prefetch every visible link on load and take a 404 for each one, so
- * prefetching is off; set it to `true` once the pages are live.
- */
-export const PREFETCH_SITE_ROUTES = false;
 
 /** Header call to action. */
 export const PRIMARY_CTA: NavCta = {
@@ -52,25 +124,31 @@ export const PRIMARY_CTA: NavCta = {
 } as const;
 
 /**
- * Everything the site search can reach today. Kept separate from `PRIMARY_NAV`
- * because search also covers destinations that are not in the top-level menu.
+ * Everything the site search can reach today. Kept separate from
+ * `PRIMARY_NAV` because search also covers destinations that are not in the
+ * top-level menu (and the top-level menu itself now mixes plain links with
+ * mega-menu triggers that have no direct route).
  */
 export const SEARCHABLE_DESTINATIONS: readonly NavLink[] = [
-  ...PRIMARY_NAV,
-  {
-    label: 'AI Audit',
-    href: '/ai-audit',
-    description: 'Book an AI Transformation Assessment.',
-  },
+  { label: 'What we do', href: '/what-we-do', description: 'Consulting, technology services and industries.' },
+  { label: 'Who we are', href: '/about', description: 'McCarthy, our company, our impact.' },
   {
     label: 'Insights',
     href: '/insights',
     description: 'Perspectives on AI strategy, agents and automation.',
   },
+  { label: 'News', href: '/news', description: 'The latest from McCarthy.' },
   {
     label: 'Careers',
     href: '/careers',
     description: 'Help build an AI transformation company from the ground up.',
+  },
+  ...WHAT_WE_DO_MEGA_MENU.columns.flatMap((column) => column.links),
+  ...WHO_WE_ARE_MEGA_MENU.columns.flatMap((column) => column.links),
+  {
+    label: 'AI Audit',
+    href: '/ai-audit',
+    description: 'Book an AI Transformation Assessment.',
   },
   {
     label: 'Contact',
@@ -78,6 +156,11 @@ export const SEARCHABLE_DESTINATIONS: readonly NavLink[] = [
     description: 'Talk to McCarthy about a transformation challenge.',
   },
 ] as const;
+
+/** Stable id for a mega-menu trigger, shared by the trigger button and its panel. */
+export function getMegaMenuId(label: string): string {
+  return `megamenu-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+}
 
 /**
  * Case-insensitive substring match across label and description.

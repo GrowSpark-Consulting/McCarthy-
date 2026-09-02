@@ -133,7 +133,7 @@
 
   /* ---- Radii ------------------------------------------------------------- */
   --radius-control: 0.25rem; /* buttons, inputs — 4px */
-  --radius-bar: 0.5rem; /* floating header bar */
+  --radius-bar: 0.75rem; /* floating header bar — 12px */
   --radius-panel: 1rem; /* recognition band */
   --radius-pill: 62.4375rem;
 
@@ -148,7 +148,7 @@
   --duration-reveal: 900ms;
 
   /* ---- Elevation --------------------------------------------------------- */
-  --shadow-bar: 0 8px 30px rgb(0 0 0 / 0.08); /* glass header bar */
+  --shadow-bar: 0 4px 10px rgb(0 0 0 / 0.06); /* glass header bar */
   --shadow-tabs: 0 8px 24px rgb(0 0 0 / 0.08); /* glass section-tab pill */
 
   /* ---- Animations -------------------------------------------------------- */
@@ -161,10 +161,30 @@
 
 /* ---- Layout constants ----------------------------------------------------- */
 :root {
-  /* Floating header bar: 16px inset, 60px tall (measured). */
+  /* Floating header bar: 16px inset on every edge; 56px tall on handsets,
+     60px from sm, 68px from lg — the reference's proportions, never so tall
+     that it competes with the hero. */
   --header-inset: 1rem;
-  --header-height: 3.75rem;
+  --header-height: 3.5rem;
   --header-band: calc(var(--header-height) + var(--header-inset) * 2);
+
+  /* Nav glass shell. One surface across four grounds: floating on a full-bleed
+     hero, over a light page, once the page has scrolled, and while the bar is
+     pointed at or holding a panel open. Never opaque — the hero has to stay
+     visible through it. */
+  --nav-glass-bg: rgb(255 255 255 / 0.55);
+  --nav-glass-bg-page: rgb(255 255 255 / 0.66);
+  --nav-glass-bg-scrolled: rgb(255 255 255 / 0.82);
+  --nav-glass-bg-active: rgb(255 255 255 / 0.92);
+  --nav-glass-border: rgb(255 255 255 / 0.3);
+  --nav-glass-blur: 20px;
+  --nav-glass-saturate: 120%;
+
+  /* Utility controls (search, menu) inside the shell — the same glass, one
+     step lighter, so they never read as heavy dark circles. */
+  --nav-control-bg: rgb(255 255 255 / 0.5);
+  --nav-control-bg-hover: rgb(255 255 255 / 0.85);
+  --nav-control-border: rgb(41 39 31 / 0.16);
 
   /* Hero occupies ~89% of the viewport (804/900 measured). */
   --hero-height: min(89svh, 50.25rem);
@@ -190,12 +210,14 @@
 @media (min-width: 40rem) {
   :root {
     --page-gutter: 1.5rem; /* 24px */
+    --header-height: 3.75rem; /* 60px */
   }
 }
 
 @media (min-width: 64rem) {
   :root {
     --page-gutter: 2rem; /* 32px */
+    --header-height: 4.25rem; /* 68px */
     --section-py: 5rem;
     --hero-content-gap: 11.5rem; /* 184px */
   }

@@ -2,7 +2,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 
 import { BrandWordmark } from '@/components/shared/brand-wordmark';
-import { FOOTER_GROUPS, FOOTER_LEGAL } from '@/content/homepage';
+import { FOOTER_GROUPS, FOOTER_LEGAL, type LinkRef } from '@/content/homepage';
 import { PREFETCH_SITE_ROUTES } from '@/lib/navigation';
 import { siteConfig } from '@/lib/site-config';
 
@@ -17,8 +17,24 @@ import { siteConfig } from '@/lib/site-config';
  * The reference shows third-party social glyphs; those are trademarked marks,
  * so the same slot carries a labelled link instead — same position, same
  * weight, nothing reproduced that isn't ours.
+ *
+ * Groups and the legal row are overridable: a page whose own copy deck sets a
+ * different footer passes its own, and every other page keeps the site-wide
+ * one untouched.
  */
-export function SiteFooter() {
+interface FooterGroup {
+  readonly heading: string;
+  readonly columns: readonly (readonly LinkRef[])[];
+}
+
+interface SiteFooterProps {
+  /** Link groups. Defaults to the site-wide set. */
+  readonly groups?: readonly FooterGroup[];
+  /** Legal row. Defaults to the site-wide set. */
+  readonly legal?: readonly LinkRef[];
+}
+
+export function SiteFooter({ groups = FOOTER_GROUPS, legal = FOOTER_LEGAL }: SiteFooterProps = {}) {
   return (
     <footer className="bg-surface-warm pt-14 pb-10 lg:pt-16">
       <div className="container-page">
@@ -40,7 +56,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-14 grid gap-12 lg:grid-cols-2 lg:gap-8">
-          {FOOTER_GROUPS.map((group) => (
+          {groups.map((group) => (
             <div key={group.heading}>
               <h2 className="text-h4 text-ink after:bg-ember after:mt-3 after:block after:h-[3px] after:w-12">
                 {group.heading}
@@ -69,7 +85,7 @@ export function SiteFooter() {
 
         <div className="border-hairline mt-16 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t pt-8">
           <ul className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            {FOOTER_LEGAL.map((link, index) => (
+            {legal.map((link, index) => (
               <li key={link.href} className="flex items-center gap-3">
                 {index > 0 ? <span aria-hidden="true" className="bg-ink/25 h-3 w-px" /> : null}
                 <Link

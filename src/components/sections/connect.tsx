@@ -17,7 +17,11 @@ const SAWTOOTH_TEETH = 16;
  */
 export function Connect() {
   return (
-    <section aria-labelledby="connect-heading" className="bg-surface-mint relative overflow-hidden">
+    <section
+      id="connect"
+      aria-labelledby="connect-heading"
+      className="bg-surface-mint relative scroll-mt-32 overflow-hidden"
+    >
       <svg
         aria-hidden="true"
         viewBox="0 0 600 320"

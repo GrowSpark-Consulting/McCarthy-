@@ -16,7 +16,10 @@ const WHAT_WE_DO_MEGA_MENU: MegaMenu = {
         { label: 'Agentic modernization', href: '/agentic-modernization' },
         { label: 'Business workflow transformation', href: '/business-workflow-transformation' },
         { label: 'Cybersecurity', href: '/cybersecurity' },
-        { label: 'People and performance', href: '/people-and-performance' },
+        {
+          label: 'People and performance',
+          href: '/what-we-do/consulting/people-performance',
+        },
       ],
     },
     {
@@ -44,7 +47,10 @@ const WHAT_WE_DO_MEGA_MENU: MegaMenu = {
       heading: 'Industries',
       links: [
         { label: 'Automotive', href: '/industries/automotive' },
-        { label: 'Banking and financial markets', href: '/industries/banking-and-financial-markets' },
+        {
+          label: 'Banking and financial markets',
+          href: '/industries/banking-and-financial-markets',
+        },
         { label: 'Chemical, Oil and Gas', href: '/industries/chemical-oil-and-gas' },
         { label: 'Consumer and Retail', href: '/industries/consumer-and-retail' },
         { label: 'Government', href: '/industries/government' },
@@ -130,7 +136,11 @@ export const PRIMARY_CTA: NavCta = {
  * mega-menu triggers that have no direct route).
  */
 export const SEARCHABLE_DESTINATIONS: readonly NavLink[] = [
-  { label: 'What we do', href: '/what-we-do', description: 'Consulting, technology services and industries.' },
+  {
+    label: 'What we do',
+    href: '/what-we-do',
+    description: 'Consulting, technology services and industries.',
+  },
   { label: 'Who we are', href: '/about', description: 'McCarthy, our company, our impact.' },
   {
     label: 'Insights',
@@ -178,4 +188,21 @@ export function searchDestinations(query: string): readonly NavLink[] {
     const haystack = `${destination.label} ${destination.description ?? ''}`.toLowerCase();
     return haystack.includes(term);
   });
+}
+
+/**
+ * Routes that open with a dark, full-bleed hero the fixed header sits on top of.
+ *
+ * The bar rides those transparently with inverted labels until it is hovered
+ * or the page scrolls past the hero. Every other route puts it over a light
+ * page, where the white glass and ink labels are the readable pairing.
+ */
+const DARK_HERO_ROUTES: readonly string[] = [
+  '/',
+  '/business-workflow-transformation',
+  '/what-we-do/consulting/people-performance',
+];
+
+export function hasDarkHero(pathname: string): boolean {
+  return DARK_HERO_ROUTES.includes(pathname);
 }

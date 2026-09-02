@@ -28,6 +28,13 @@ export interface MegaMenuColumn {
   readonly links: readonly NavLink[];
 }
 
+/**
+ * One grid column of the panel. Usually a single section, but "What we do"
+ * stacks two ("Consulting services" then "How we work") in its first column,
+ * matching the reference's layout rather than giving each its own column.
+ */
+export type MegaMenuColumnGroup = readonly MegaMenuColumn[];
+
 /** The featured card on the right edge of a mega menu. */
 export interface MegaMenuSpotlight {
   readonly eyebrow: string;
@@ -38,7 +45,7 @@ export interface MegaMenuSpotlight {
 
 /** The full panel a "What we do" / "Who we are" style trigger opens. */
 export interface MegaMenu {
-  readonly columns: readonly MegaMenuColumn[];
+  readonly columns: readonly MegaMenuColumnGroup[];
   readonly spotlight: MegaMenuSpotlight;
 }
 

@@ -76,7 +76,7 @@ export const MegaMenu = forwardRef<HTMLDivElement, MegaMenuProps>(function MegaM
       style={{ top: 'calc(var(--header-band) + 0.5rem)' }}
     >
       <div className="mx-auto max-w-[120rem]">
-        <div className="border-hairline bg-canvas relative max-h-[calc(100svh-var(--header-band)-2rem)] overflow-y-auto rounded-[var(--radius-bar)] border p-6 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)] sm:p-8 lg:p-10">
+        <div className="border-hairline bg-white/92 relative max-h-[calc(100svh-var(--header-band)-2rem)] overflow-y-auto rounded-[var(--radius-bar)] border p-6 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.18)] backdrop-blur-[14px] sm:p-8 lg:p-10">
           <IconButton
             aria-label={`Close ${label} menu`}
             variant="outline"

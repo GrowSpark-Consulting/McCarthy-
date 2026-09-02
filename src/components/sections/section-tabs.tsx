@@ -12,9 +12,11 @@ const ACTIVE_LINE_RATIO = 0.35;
 /**
  * Section 4 — the sticky in-page tab pill.
  *
- * Reproduces the reference exactly: a white pill floating below the header
- * (48px tall, fully rounded, soft shadow) whose active item is a black pill
- * with white text, updating as you scroll past each anchored section.
+ * Reproduces the reference exactly: a white glass pill floating below the
+ * header (48px tall, fully rounded, 88% white over a 14px backdrop blur so
+ * the page reads faintly through it, hairlined in white/65 and lifted by a
+ * soft shadow) whose active item is a black pill with white text, updating
+ * as you scroll past each anchored section.
  *
  * Scrolling is handed to Lenis when it is running so the jump matches the rest
  * of the page's motion, with a native fallback under reduced motion.
@@ -71,7 +73,7 @@ export function SectionTabs() {
     <div className="pointer-events-none sticky top-[calc(var(--header-band)+0.5rem)] z-40 flex justify-center px-[var(--page-gutter)]">
       <nav
         aria-label="Page sections"
-        className="bg-canvas shadow-tabs pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full p-1.5"
+        className="border-white/65 bg-white/88 shadow-tabs pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 backdrop-blur-[14px]"
       >
         {SECTION_TABS.map((tab) => {
           const id = tab.href.replace('#', '');

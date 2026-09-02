@@ -207,6 +207,10 @@ const DARK_HERO_ROUTES: readonly string[] = [
   '/',
   '/business-workflow-transformation',
   '/what-we-do/consulting/people-performance',
+  '/cybersecurity',
+  '/mccarthy-institute',
+  '/mccarthy-flow',
+  '/ai-lab',
 ];
 
 export function hasDarkHero(pathname: string): boolean {

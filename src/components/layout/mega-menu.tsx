@@ -3,10 +3,9 @@
 import { forwardRef } from 'react';
 
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { ArrowRight, X } from 'lucide-react';
 import Link from 'next/link';
 
-import { ArrowLink } from '@/components/shared/arrow-link';
 import { Eyebrow } from '@/components/shared/eyebrow';
 import { PlaceholderFrame } from '@/components/shared/placeholder-frame';
 import { IconButton } from '@/components/ui/icon-button';
@@ -47,10 +46,12 @@ function MegaMenuLink({ href, children }: { readonly href: string; readonly chil
 }
 
 /**
- * Kyndryl-style mega menu: a floating white panel beneath the header bar with
+ * Mega menu: a floating white panel beneath the header bar with
  * orange section headings, a subtle underline on link hover, and a spotlight
- * card on the right. Data-driven so "What we do" and "Who we are" share one
- * implementation.
+ * card on the right — the reference's overlay treatment: eyebrow above the
+ * crop, then title, body and a circular arrow set over a scrim on the image
+ * itself, the whole card one link. Data-driven so "What we do" and "Who we
+ * are" share one implementation.
  *
  * Positioned to match the floating header's own inset and max-width rather
  * than going full-bleed, so it reads as part of the same bar rather than a
@@ -112,21 +113,39 @@ export const MegaMenu = forwardRef<HTMLDivElement, MegaMenuProps>(function MegaM
               ))}
             </div>
 
-            <aside className="border-hairline flex w-full flex-col gap-5 border-t pt-8 xl:w-72 xl:shrink-0 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-10">
-              <PlaceholderFrame
-                label="Spotlight image"
-                tone="light"
-                className="aspect-[16/10] xl:aspect-[4/5]"
-              />
+            <aside className="border-hairline flex w-full flex-col gap-4 border-t pt-8 xl:w-72 xl:shrink-0 xl:border-t-0 xl:border-l xl:pt-0 xl:pl-10">
+              <Eyebrow>{menu.spotlight.eyebrow}</Eyebrow>
 
-              <div className="flex flex-col gap-3">
-                <Eyebrow>{menu.spotlight.eyebrow}</Eyebrow>
-                <h4 className="text-card text-ink">{menu.spotlight.title}</h4>
-                <p className="text-body text-ink-muted">{menu.spotlight.body}</p>
-                <ArrowLink href={menu.spotlight.link.href} className="mt-1">
-                  {menu.spotlight.link.label}
-                </ArrowLink>
-              </div>
+              <Link
+                href={menu.spotlight.link.href}
+                prefetch={PREFETCH_SITE_ROUTES}
+                aria-label={menu.spotlight.link.label}
+                className="group/spotlight focus-visible:outline-ember relative flex min-h-60 flex-col justify-end overflow-hidden rounded-[var(--radius-bar)] focus-visible:outline-2 focus-visible:outline-offset-3 xl:min-h-[22rem]"
+              >
+                <PlaceholderFrame
+                  label="Spotlight image"
+                  tone="light"
+                  className="absolute inset-0 h-full"
+                />
+
+                {/* Reads the title over any crop — the same bottom-up scrim the
+                    hero and AI Lab bands use over their footage. */}
+                <div
+                  aria-hidden="true"
+                  className="from-abyss-deep via-abyss-deep/85 absolute inset-x-0 top-1/4 bottom-0 bg-gradient-to-t to-transparent"
+                />
+
+                <div className="relative flex flex-col gap-2.5 p-5">
+                  <h4 className="text-card text-ink-inverse">{menu.spotlight.title}</h4>
+                  <p className="text-body text-ink-inverse/85">{menu.spotlight.body}</p>
+                  <span
+                    aria-hidden="true"
+                    className="border-ink-inverse/45 text-ink-inverse group-hover/spotlight:bg-ink-inverse group-hover/spotlight:text-ink-strong group-hover/spotlight:border-ink-inverse mt-2 flex size-9 shrink-0 items-center justify-center self-end rounded-full border transition-colors duration-[var(--duration-base)] ease-[var(--ease-out-quint)]"
+                  >
+                    <ArrowRight strokeWidth={1.75} className="size-4" />
+                  </span>
+                </div>
+              </Link>
             </aside>
           </div>
         </div>

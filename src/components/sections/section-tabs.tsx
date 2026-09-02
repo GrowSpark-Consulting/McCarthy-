@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from 'react';
 
-import { SECTION_TABS } from '@/content/homepage';
+import { SECTION_TABS, type LinkRef } from '@/content/homepage';
 import { useSmoothScroll } from '@/components/providers/smooth-scroll-provider';
 import { cn } from '@/lib/utils';
+
+interface SectionTabsProps {
+  /** Anchors to track. Defaults to the homepage's own sections. */
+  readonly tabs?: readonly LinkRef[];
+  /** Accessible name, for pages that carry more than one tab set. */
+  readonly label?: string;
+}
 
 /** Fraction of the viewport used as the "current section" line. */
 const ACTIVE_LINE_RATIO = 0.35;
@@ -21,14 +28,12 @@ const ACTIVE_LINE_RATIO = 0.35;
  * Scrolling is handed to Lenis when it is running so the jump matches the rest
  * of the page's motion, with a native fallback under reduced motion.
  */
-export function SectionTabs() {
-  const [activeId, setActiveId] = useState<string>(() =>
-    (SECTION_TABS[0]?.href ?? '#').replace('#', ''),
-  );
+export function SectionTabs({ tabs = SECTION_TABS, label = 'Page sections' }: SectionTabsProps) {
+  const [activeId, setActiveId] = useState<string>(() => (tabs[0]?.href ?? '#').replace('#', ''));
   const lenis = useSmoothScroll();
 
   useEffect(() => {
-    const ids = SECTION_TABS.map((tab) => tab.href.replace('#', ''));
+    const ids = tabs.map((tab) => tab.href.replace('#', ''));
 
     const updateActive = () => {
       const line = window.innerHeight * ACTIVE_LINE_RATIO;
@@ -53,7 +58,7 @@ export function SectionTabs() {
       window.removeEventListener('scroll', updateActive);
       window.removeEventListener('resize', updateActive);
     };
-  }, []);
+  }, [tabs]);
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     const target = document.getElementById(href.replace('#', ''));
@@ -72,10 +77,10 @@ export function SectionTabs() {
   return (
     <div className="pointer-events-none sticky top-[calc(var(--header-band)+0.5rem)] z-40 flex justify-center px-[var(--page-gutter)]">
       <nav
-        aria-label="Page sections"
+        aria-label={label}
         className="border-white/65 bg-white/88 shadow-tabs pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 backdrop-blur-[14px]"
       >
-        {SECTION_TABS.map((tab) => {
+        {tabs.map((tab) => {
           const id = tab.href.replace('#', '');
           const isActive = id === activeId;
 

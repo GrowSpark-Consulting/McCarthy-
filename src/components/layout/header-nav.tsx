@@ -13,10 +13,35 @@ interface HeaderNavProps {
   readonly activeMegaMenu: string | null;
   /** Toggles a mega menu open/closed — clicking the open trigger again closes it. */
   readonly onToggleMegaMenu: (id: string) => void;
+  /** `inverse` while the bar rides a dark hero transparently. */
+  readonly tone?: NavTone;
 }
+
+type NavTone = 'ink' | 'inverse';
 
 const TRIGGER_CLASS =
   'text-nav flex items-center gap-1 rounded-[var(--radius-control)] px-3 py-2 whitespace-nowrap transition-colors duration-[var(--duration-base)] ease-[var(--ease-out-quint)]';
+
+/**
+ * Label colours per bar tone.
+ *
+ * `inverse` needs no plain `hover:` rules — hovering a label necessarily
+ * hovers the bar, so `group-hover/bar` covers it, and the stacked
+ * `group-hover/bar:hover:` pair outranks it on specificity rather than on
+ * source order. That is what lets the labels turn back to ink in step with
+ * the bar filling to white.
+ */
+const TONE_CLASS: Record<NavTone, { readonly idle: string; readonly active: string }> = {
+  ink: {
+    idle: 'text-ink-strong hover:bg-ink/8',
+    active: 'bg-ink/8 text-ink-strong',
+  },
+  inverse: {
+    idle: 'text-ink-inverse/90 group-hover/bar:text-ink group-hover/bar:hover:bg-ink/5 group-hover/bar:hover:text-ink-strong',
+    active:
+      'bg-ink-inverse/12 text-ink-inverse group-hover/bar:bg-ink/8 group-hover/bar:text-ink-strong',
+  },
+};
 
 /**
  * Desktop primary navigation inside the floating bar.
@@ -26,8 +51,14 @@ const TRIGGER_CLASS =
  * Careers) stays a plain route link, matching the reference exactly: 14px/20px
  * labels, 8px/12px padding, 4px hover radius, no gap between items.
  */
-export function HeaderNav({ className, activeMegaMenu, onToggleMegaMenu }: HeaderNavProps) {
+export function HeaderNav({
+  className,
+  activeMegaMenu,
+  onToggleMegaMenu,
+  tone = 'ink',
+}: HeaderNavProps) {
   const pathname = usePathname();
+  const toneClass = TONE_CLASS[tone];
 
   return (
     <nav aria-label="Primary" className={cn('items-center', className)}>
@@ -44,12 +75,7 @@ export function HeaderNav({ className, activeMegaMenu, onToggleMegaMenu }: Heade
               aria-haspopup="true"
               aria-controls={menuId}
               onClick={() => onToggleMegaMenu(menuId)}
-              className={cn(
-                TRIGGER_CLASS,
-                isOpen
-                  ? 'bg-ink/8 text-ink-strong'
-                  : 'text-ink hover:bg-ink/5 hover:text-ink-strong',
-              )}
+              className={cn(TRIGGER_CLASS, isOpen ? toneClass.active : toneClass.idle)}
             >
               {item.label}
               <ChevronDown
@@ -73,12 +99,7 @@ export function HeaderNav({ className, activeMegaMenu, onToggleMegaMenu }: Heade
             href={href}
             prefetch={PREFETCH_SITE_ROUTES}
             aria-current={isActive ? 'page' : undefined}
-            className={cn(
-              TRIGGER_CLASS,
-              isActive
-                ? 'bg-ink/8 text-ink-strong'
-                : 'text-ink hover:bg-ink/5 hover:text-ink-strong',
-            )}
+            className={cn(TRIGGER_CLASS, isActive ? toneClass.active : toneClass.idle)}
           >
             {item.label}
           </Link>

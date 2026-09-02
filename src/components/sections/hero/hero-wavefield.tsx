@@ -69,6 +69,12 @@ const FAN_LINES = buildFan();
 
 interface HeroWavefieldProps {
   readonly className?: string;
+  /**
+   * Namespace for the gradient ids. Two wavefields in one document would
+   * otherwise both resolve `url(#mc-crest)` to whichever rendered first, and
+   * the second would silently paint in the first one's accent.
+   */
+  readonly idPrefix?: string;
 }
 
 /**
@@ -81,7 +87,11 @@ interface HeroWavefieldProps {
  * at every DPR, zero image requests, and animation limited to two
  * compositor-only transforms.
  */
-export function HeroWavefield({ className }: HeroWavefieldProps) {
+export function HeroWavefield({ className, idPrefix = 'mc' }: HeroWavefieldProps) {
+  const crestId = `${idPrefix}-crest`;
+  const fanId = `${idPrefix}-fan`;
+  const glowId = `${idPrefix}-glow`;
+
   return (
     <svg
       aria-hidden="true"
@@ -91,20 +101,20 @@ export function HeroWavefield({ className }: HeroWavefieldProps) {
       className={cn('absolute inset-0 size-full', className)}
     >
       <defs>
-        <linearGradient id="mc-crest" x1="0" y1="0" x2="1" y2="0.5">
+        <linearGradient id={crestId} x1="0" y1="0" x2="1" y2="0.5">
           <stop offset="0%" stopColor="var(--hero-accent)" stopOpacity="0.08" />
           <stop offset="26%" stopColor="var(--hero-accent)" stopOpacity="1" />
           <stop offset="66%" stopColor="var(--hero-accent-soft)" stopOpacity="0.9" />
           <stop offset="100%" stopColor="var(--hero-accent-soft)" stopOpacity="0.12" />
         </linearGradient>
 
-        <linearGradient id="mc-fan" x1="0" y1="0" x2="1" y2="0.8">
+        <linearGradient id={fanId} x1="0" y1="0" x2="1" y2="0.8">
           <stop offset="0%" stopColor="var(--hero-accent-soft)" stopOpacity="0.05" />
           <stop offset="45%" stopColor="var(--hero-accent)" stopOpacity="0.75" />
           <stop offset="100%" stopColor="var(--hero-accent)" stopOpacity="0.15" />
         </linearGradient>
 
-        <linearGradient id="mc-glow" x1="0" y1="0" x2="1" y2="0.4">
+        <linearGradient id={glowId} x1="0" y1="0" x2="1" y2="0.4">
           <stop offset="0%" stopColor="var(--hero-accent)" stopOpacity="0" />
           <stop offset="38%" stopColor="var(--hero-accent)" stopOpacity="0.85" />
           <stop offset="100%" stopColor="var(--hero-accent)" stopOpacity="0" />
@@ -116,7 +126,7 @@ export function HeroWavefield({ className }: HeroWavefieldProps) {
         <path
           d={CREST_LINES[8]?.d ?? ''}
           fill="none"
-          stroke="url(#mc-glow)"
+          stroke={`url(#${glowId})`}
           strokeWidth={120}
           strokeLinecap="round"
           opacity={0.75}
@@ -130,7 +140,7 @@ export function HeroWavefield({ className }: HeroWavefieldProps) {
             key={`fan-${index}`}
             d={line.d}
             fill="none"
-            stroke="url(#mc-fan)"
+            stroke={`url(#${fanId})`}
             strokeWidth={line.width}
             strokeLinecap="round"
             opacity={line.opacity}
@@ -145,7 +155,7 @@ export function HeroWavefield({ className }: HeroWavefieldProps) {
             key={`crest-${index}`}
             d={line.d}
             fill="none"
-            stroke="url(#mc-crest)"
+            stroke={`url(#${crestId})`}
             strokeWidth={line.width}
             strokeLinecap="round"
             opacity={line.opacity}

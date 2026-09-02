@@ -79,7 +79,7 @@ export function Connect(props: ConnectProps = {}) {
       id={id}
       aria-labelledby="connect-heading"
       className={cn('scroll-mt-32 relative overflow-hidden', palette.section)}
-    >
+     >
       <svg
         aria-hidden="true"
         viewBox="0 0 600 320"

@@ -148,8 +148,8 @@
   --duration-reveal: 900ms;
 
   /* ---- Elevation --------------------------------------------------------- */
-  --shadow-bar: 0 2px 18px -6px rgb(0 0 0 / 0.35);
-  --shadow-tabs: 0 6px 24px -10px rgb(0 0 0 / 0.22);
+  --shadow-bar: 0 8px 30px rgb(0 0 0 / 0.08); /* glass header bar */
+  --shadow-tabs: 0 8px 24px rgb(0 0 0 / 0.08); /* glass section-tab pill */
 
   /* ---- Animations -------------------------------------------------------- */
   --animate-drift-slow: drift-slow 26s var(--ease-in-out-soft) infinite;

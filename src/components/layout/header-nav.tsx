@@ -47,8 +47,8 @@ export function HeaderNav({ className, activeMegaMenu, onToggleMegaMenu }: Heade
               className={cn(
                 TRIGGER_CLASS,
                 isOpen
-                  ? 'bg-ink-inverse/12 text-ink-inverse'
-                  : 'text-ink-inverse/85 hover:bg-ink-inverse/10 hover:text-ink-inverse',
+                  ? 'bg-ink/8 text-ink-strong'
+                  : 'text-ink hover:bg-ink/5 hover:text-ink-strong',
               )}
             >
               {item.label}
@@ -76,8 +76,8 @@ export function HeaderNav({ className, activeMegaMenu, onToggleMegaMenu }: Heade
             className={cn(
               TRIGGER_CLASS,
               isActive
-                ? 'bg-ink-inverse/12 text-ink-inverse'
-                : 'text-ink-inverse/85 hover:bg-ink-inverse/10 hover:text-ink-inverse',
+                ? 'bg-ink/8 text-ink-strong'
+                : 'text-ink hover:bg-ink/5 hover:text-ink-strong',
             )}
           >
             {item.label}

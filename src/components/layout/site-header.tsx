@@ -38,12 +38,14 @@ type ActiveOverlay = 'menu' | 'search' | null;
  * Site header.
  *
  * Reproduces the reference's floating bar rather than a full-bleed strip: inset
- * 16px from the top and both edges, 60px tall, 8px radius, translucent dark
- * glass over the hero. Measured from the live site at 1536/1440/768/390 — the
- * inset and height hold at every breakpoint.
+ * 16px from the top and both edges, 60px tall, 8px radius. Predominantly white
+ * glass — 78% white over a 16px backdrop blur, so the hero reads faintly
+ * through it — hairlined in white/40 and lifted by a soft shadow. Measured
+ * from the live site at 1536/1440/768/390 — the inset and height hold at
+ * every breakpoint.
  *
- * Behaviour: the bar darkens once the page leaves the hero, hides on downward
- * scroll and returns immediately on upward scroll.
+ * Behaviour: the glass tightens to 90% once the page leaves the hero, hides
+ * on downward scroll and returns immediately on upward scroll.
  */
 export function SiteHeader() {
   const { isScrolled, isHidden } = useHeaderScrollState();
@@ -127,9 +129,10 @@ export function SiteHeader() {
           ref={barRef}
           className={cn(
             'mx-auto flex h-[var(--header-height)] max-w-[120rem] items-center gap-3',
-            'rounded-[var(--radius-bar)] px-4 backdrop-blur-xl lg:px-6',
+            'rounded-[var(--radius-bar)] px-4 backdrop-blur-[16px] lg:px-6',
             'transition-[background-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out-quint)]',
-            isScrolled ? 'bg-abyss-deep/92 shadow-bar' : 'bg-abyss/55',
+            'border border-white/40 shadow-bar',
+            isScrolled ? 'bg-white/90' : 'bg-white/78',
           )}
         >
           <Link
@@ -172,7 +175,7 @@ export function SiteHeader() {
               aria-controls={SEARCH_OVERLAY_ID}
               aria-haspopup="dialog"
               onClick={openSearch}
-              className="border-ink-inverse/35 text-ink-inverse hover:border-ink-inverse hover:bg-ink-inverse/10 flex size-11 items-center justify-center rounded-full border transition-colors duration-[var(--duration-base)]"
+              className="border-ink/30 text-ink-strong hover:border-ink-strong hover:bg-ink/8 flex size-11 items-center justify-center rounded-full border transition-colors duration-[var(--duration-base)]"
             >
               <Search aria-hidden="true" strokeWidth={1.75} className="size-[1.15rem]" />
             </button>
@@ -184,7 +187,7 @@ export function SiteHeader() {
               aria-controls={MOBILE_MENU_ID}
               aria-haspopup="dialog"
               onClick={openMobileMenu}
-              className="border-ink-inverse/35 text-ink-inverse hover:border-ink-inverse hover:bg-ink-inverse/10 flex size-11 items-center justify-center rounded-full border transition-colors duration-[var(--duration-base)] lg:hidden"
+              className="border-ink/30 text-ink-strong hover:border-ink-strong hover:bg-ink/8 flex size-11 items-center justify-center rounded-full border transition-colors duration-[var(--duration-base)] lg:hidden"
             >
               <Menu aria-hidden="true" strokeWidth={1.75} className="size-[1.15rem]" />
             </button>

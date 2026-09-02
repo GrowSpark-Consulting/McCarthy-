@@ -10,52 +10,58 @@ export const PREFETCH_SITE_ROUTES = false;
 
 const WHAT_WE_DO_MEGA_MENU: MegaMenu = {
   columns: [
-    {
-      heading: 'Consulting services',
-      links: [
-        { label: 'Agentic modernization', href: '/agentic-modernization' },
-        { label: 'Business workflow transformation', href: '/business-workflow-transformation' },
-        { label: 'Cybersecurity', href: '/cybersecurity' },
-        { label: 'People and performance', href: '/people-and-performance' },
-      ],
-    },
-    {
-      heading: 'How we work',
-      links: [
-        { label: 'McCarthy Labs', href: '/ai-lab' },
-        { label: 'McCarthy Flow', href: '/mccarthy-flow' },
-        { label: 'The McCarthy Transformation System™️', href: '/about/transformation-system' },
-        { label: 'McCarthy Institute', href: '/mccarthy-institute' },
-      ],
-    },
-    {
-      heading: 'Technology services',
-      links: [
-        { label: 'Applications', href: '/applications' },
-        { label: 'Artificial intelligence and data', href: '/artificial-intelligence-and-data' },
-        { label: 'Cloud', href: '/cloud' },
-        { label: 'Cyber resilience', href: '/cyber-resilience' },
-        { label: 'Digital workplace', href: '/digital-workplace' },
-        { label: 'Mainframe', href: '/mainframe' },
-        { label: 'Networks', href: '/networks' },
-      ],
-    },
-    {
-      heading: 'Industries',
-      links: [
-        { label: 'Automotive', href: '/industries/automotive' },
-        { label: 'Banking and financial markets', href: '/industries/banking-and-financial-markets' },
-        { label: 'Chemical, Oil and Gas', href: '/industries/chemical-oil-and-gas' },
-        { label: 'Consumer and Retail', href: '/industries/consumer-and-retail' },
-        { label: 'Government', href: '/industries/government' },
-        { label: 'Healthcare', href: '/industries/healthcare' },
-        { label: 'Insurance', href: '/industries/insurance' },
-        { label: 'Manufacturing', href: '/industries/manufacturing' },
-        { label: 'Technology, Media and…', href: '/industries/technology-media' },
-        { label: 'Travel and Transportation', href: '/industries/travel-and-transportation' },
-        { label: 'Utilities', href: '/industries/utilities' },
-      ],
-    },
+    [
+      {
+        heading: 'Consulting services',
+        links: [
+          { label: 'Agentic modernization', href: '/agentic-modernization' },
+          { label: 'Business workflow transformation', href: '/business-workflow-transformation' },
+          { label: 'Cybersecurity', href: '/cybersecurity' },
+          { label: 'People and performance', href: '/people-and-performance' },
+        ],
+      },
+      {
+        heading: 'How we work',
+        links: [
+          { label: 'McCarthy Labs', href: '/ai-lab' },
+          { label: 'McCarthy Flow', href: '/mccarthy-flow' },
+          { label: 'The McCarthy Transformation System™️', href: '/about/transformation-system' },
+          { label: 'McCarthy Institute', href: '/mccarthy-institute' },
+        ],
+      },
+    ],
+    [
+      {
+        heading: 'Technology services',
+        links: [
+          { label: 'Applications', href: '/applications' },
+          { label: 'Artificial intelligence and data', href: '/artificial-intelligence-and-data' },
+          { label: 'Cloud', href: '/cloud' },
+          { label: 'Cyber resilience', href: '/cyber-resilience' },
+          { label: 'Digital workplace', href: '/digital-workplace' },
+          { label: 'Mainframe', href: '/mainframe' },
+          { label: 'Networks', href: '/networks' },
+        ],
+      },
+    ],
+    [
+      {
+        heading: 'Industries',
+        links: [
+          { label: 'Automotive', href: '/industries/automotive' },
+          { label: 'Banking and financial markets', href: '/industries/banking-and-financial-markets' },
+          { label: 'Chemical, Oil and Gas', href: '/industries/chemical-oil-and-gas' },
+          { label: 'Consumer and Retail', href: '/industries/consumer-and-retail' },
+          { label: 'Government', href: '/industries/government' },
+          { label: 'Healthcare', href: '/industries/healthcare' },
+          { label: 'Insurance', href: '/industries/insurance' },
+          { label: 'Manufacturing', href: '/industries/manufacturing' },
+          { label: 'Technology, Media and…', href: '/industries/technology-media' },
+          { label: 'Travel and Transportation', href: '/industries/travel-and-transportation' },
+          { label: 'Utilities', href: '/industries/utilities' },
+        ],
+      },
+    ],
   ],
   spotlight: {
     eyebrow: 'Spotlight',
@@ -67,30 +73,36 @@ const WHAT_WE_DO_MEGA_MENU: MegaMenu = {
 
 const WHO_WE_ARE_MEGA_MENU: MegaMenu = {
   columns: [
-    {
-      heading: 'Our company',
-      links: [
-        { label: 'About us', href: '/about' },
-        { label: 'Alliances', href: '/about/alliances' },
-        { label: 'Leadership', href: '/about/leadership' },
-        { label: 'Locations', href: '/about/locations' },
-        { label: 'Trust', href: '/about/trust' },
-      ],
-    },
-    {
-      heading: 'Our impact',
-      links: [
-        { label: 'Customer stories', href: '/customer-stories' },
-        { label: 'News', href: '/news' },
-      ],
-    },
-    {
-      heading: 'Get involved',
-      links: [
-        { label: 'Careers', href: '/careers' },
-        { label: 'Contact us', href: '/contact' },
-      ],
-    },
+    [
+      {
+        heading: 'Our company',
+        links: [
+          { label: 'About us', href: '/about' },
+          { label: 'Alliances', href: '/about/alliances' },
+          { label: 'Leadership', href: '/about/leadership' },
+          { label: 'Locations', href: '/about/locations' },
+          { label: 'Trust', href: '/about/trust' },
+        ],
+      },
+    ],
+    [
+      {
+        heading: 'Our impact',
+        links: [
+          { label: 'Customer stories', href: '/customer-stories' },
+          { label: 'News', href: '/news' },
+        ],
+      },
+    ],
+    [
+      {
+        heading: 'Get involved',
+        links: [
+          { label: 'Careers', href: '/careers' },
+          { label: 'Contact us', href: '/contact' },
+        ],
+      },
+    ],
   ],
   spotlight: {
     eyebrow: 'Spotlight',
@@ -143,8 +155,8 @@ export const SEARCHABLE_DESTINATIONS: readonly NavLink[] = [
     href: '/careers',
     description: 'Help build an AI transformation company from the ground up.',
   },
-  ...WHAT_WE_DO_MEGA_MENU.columns.flatMap((column) => column.links),
-  ...WHO_WE_ARE_MEGA_MENU.columns.flatMap((column) => column.links),
+  ...WHAT_WE_DO_MEGA_MENU.columns.flat().flatMap((column) => column.links),
+  ...WHO_WE_ARE_MEGA_MENU.columns.flat().flatMap((column) => column.links),
   {
     label: 'AI Audit',
     href: '/ai-audit',

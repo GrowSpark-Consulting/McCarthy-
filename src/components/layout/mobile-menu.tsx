@@ -124,7 +124,7 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
                         className="overflow-hidden"
                       >
                         <div className="flex flex-col gap-6 pb-7">
-                          {item.megaMenu.columns.map((column) => (
+                          {item.megaMenu.columns.flat().map((column) => (
                             <div key={column.heading} className="flex flex-col gap-2.5">
                               <p className="text-eyebrow text-ember-text uppercase">{column.heading}</p>
                               <ul className="flex flex-col">

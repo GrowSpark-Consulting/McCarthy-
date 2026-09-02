@@ -94,16 +94,20 @@ export const MegaMenu = forwardRef<HTMLDivElement, MegaMenuProps>(function MegaM
                 columnCount >= 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-3',
               )}
             >
-              {menu.columns.map((column) => (
-                <div key={column.heading} className="flex flex-col gap-4">
-                  <h3 className="text-eyebrow text-ember uppercase">{column.heading}</h3>
-                  <ul className="flex flex-col gap-3.5">
-                    {column.links.map((link) => (
-                      <li key={link.href}>
-                        <MegaMenuLink href={link.href}>{link.label}</MegaMenuLink>
-                      </li>
-                    ))}
-                  </ul>
+              {menu.columns.map((group, groupIndex) => (
+                <div key={groupIndex} className="flex flex-col gap-8">
+                  {group.map((column) => (
+                    <div key={column.heading} className="flex flex-col gap-4">
+                      <h3 className="text-eyebrow text-ember uppercase">{column.heading}</h3>
+                      <ul className="flex flex-col gap-2">
+                        {column.links.map((link) => (
+                          <li key={link.href}>
+                            <MegaMenuLink href={link.href}>{link.label}</MegaMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

@@ -27,12 +27,40 @@ export interface ConsultingBlock {
   readonly tag?: string;
 }
 
+/** One step in a breadcrumb trail. The last step carries no href. */
+export interface BreadcrumbStep {
+  readonly label: string;
+  readonly href?: string;
+}
+
 /** The masthead of a consulting page. */
 export interface ConsultingHeroContent {
-  readonly breadcrumb: { readonly home: LinkRef; readonly current: string };
+  /** Omitted on pages whose deck sets no trail. */
+  readonly breadcrumb?: readonly BreadcrumbStep[];
   readonly eyebrow: string;
   /** Pre-split into the lines the copy deck sets. */
   readonly headline: readonly string[];
-  readonly body: string;
+  /** Supporting sentence, where the deck sets one. */
+  readonly body?: string;
+  /** Primary action, where the deck sets one. */
+  readonly cta?: LinkRef;
+  /** A short line plus a link, e.g. an existing-account prompt. */
+  readonly note?: { readonly text: string; readonly link: LinkRef };
   readonly media: HeroMedia;
+}
+
+/** One oversized metric in a statistics band. */
+export interface ConsultingStat {
+  readonly value: string;
+  readonly label: string;
+  /** Supporting sentence, where the deck sets one. */
+  readonly body?: string;
+}
+
+/** One person in a profile grid. */
+export interface ConsultingPerson {
+  readonly name: string;
+  readonly title: string;
+  /** Organisation or location line beneath the title. */
+  readonly meta: string;
 }

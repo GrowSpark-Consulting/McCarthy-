@@ -29,7 +29,7 @@ export const PEOPLE_TABS: readonly LinkRef[] = [
 ];
 
 export const PEOPLE_HERO: ConsultingHeroContent = {
-  breadcrumb: { home: { label: 'Home', href: '/' }, current: 'Consulting' },
+  breadcrumb: [{ label: 'Home', href: '/' }, { label: 'Consulting' }],
   eyebrow: 'People and performance',
   /** Set as three lines in the deck; the break is intentional. */
   headline: ['Shaping workforces', 'that outpace', 'change'],

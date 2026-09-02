@@ -32,7 +32,7 @@ export const WORKFLOW_TABS: readonly LinkRef[] = [
 ];
 
 export const WORKFLOW_HERO: ConsultingHeroContent = {
-  breadcrumb: { home: { label: 'Home', href: '/' }, current: 'Consulting' },
+  breadcrumb: [{ label: 'Home', href: '/' }, { label: 'Consulting' }],
   eyebrow: 'Business workflow transformation',
   /** Set as three lines in the deck; the break is intentional. */
   headline: ['Transform the', 'workflows your', 'business depends on'],

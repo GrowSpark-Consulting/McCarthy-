@@ -66,7 +66,9 @@ export function SiteFooter({ groups = FOOTER_GROUPS, legal = FOOTER_LEGAL }: Sit
                 {group.columns.map((column, columnIndex) => (
                   <ul key={columnIndex} className="flex flex-col gap-5">
                     {column.map((link) => (
-                      <li key={link.href}>
+                      // Keyed on both: a copy deck may point several links at
+                      // one destination, and href alone then collides.
+                      <li key={`${link.label}-${link.href}`}>
                         <Link
                           href={link.href}
                           prefetch={PREFETCH_SITE_ROUTES}
@@ -86,7 +88,7 @@ export function SiteFooter({ groups = FOOTER_GROUPS, legal = FOOTER_LEGAL }: Sit
         <div className="border-hairline mt-16 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-t pt-8">
           <ul className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {legal.map((link, index) => (
-              <li key={link.href} className="flex items-center gap-3">
+              <li key={`${link.label}-${link.href}`} className="flex items-center gap-3">
                 {index > 0 ? <span aria-hidden="true" className="bg-ink/25 h-3 w-px" /> : null}
                 <Link
                   href={link.href}

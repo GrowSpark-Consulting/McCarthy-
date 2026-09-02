@@ -1,3 +1,4 @@
+import { CONSULTING_FOOTER_GROUPS, CONSULTING_FOOTER_LEGAL } from './consulting-footer';
 import type { LinkRef } from './homepage';
 import type { ConsultingBlock, ConsultingCard, ConsultingHeroContent } from '@/types/consulting';
 
@@ -30,7 +31,7 @@ export const CYBER_TABS: readonly LinkRef[] = [
 ];
 
 export const CYBER_HERO: ConsultingHeroContent = {
-  breadcrumb: { home: { label: 'Home', href: '/' }, current: 'Consulting' },
+  breadcrumb: [{ label: 'Home', href: '/' }, { label: 'Consulting' }],
   eyebrow: 'Cybersecurity',
   /** Set as three lines in the deck; the break is intentional. */
   headline: ['Turn cyber resilience', 'into an operating model', 'for the AI era'],
@@ -154,50 +155,6 @@ export const CYBER_CAPABILITIES = {
   ] as readonly ConsultingCard[],
 } as const;
 
-/**
- * Footer content as the cybersecurity deck sets it, which differs from the
- * site-wide footer: the service names are still placeholders, the second group
- * is "About us" rather than "Company", and the legal row runs longer. Passed
- * to `SiteFooter` for this page only, so no other page is affected.
- */
-export const CYBER_FOOTER_GROUPS = [
-  {
-    heading: 'Services',
-    columns: [
-      [
-        { label: '[Service 1]', href: '/services' },
-        { label: '[Service 2]', href: '/services' },
-        { label: '[Service 3]', href: '/services' },
-      ],
-      [
-        { label: '[Service 4]', href: '/services' },
-        { label: '[Service 5]', href: '/services' },
-      ],
-    ],
-  },
-  {
-    heading: 'About us',
-    columns: [
-      [
-        { label: 'Leadership', href: '/about/leadership' },
-        { label: 'Careers', href: '/careers' },
-        { label: 'Contact us', href: '/contact' },
-      ],
-      [
-        { label: 'Corporate citizenship', href: '/about/corporate-citizenship' },
-        { label: 'Our values', href: '/about/values' },
-      ],
-    ],
-  },
-] as const;
-
-export const CYBER_FOOTER_LEGAL: readonly LinkRef[] = [
-  { label: 'Privacy', href: '/privacy' },
-  { label: 'Terms', href: '/terms' },
-  { label: 'Security', href: '/security' },
-  { label: 'Sitemap', href: '/sitemap.xml' },
-  { label: 'Do not sell or share my personal information', href: '/privacy#do-not-sell' },
-  { label: 'Accessibility', href: '/accessibility' },
-  { label: 'Cookie Preferences', href: '/cookie-preferences' },
-  { label: 'SG/IN - EN', href: '/' },
-];
+/** The deck's footer is the shared consulting one. */
+export const CYBER_FOOTER_GROUPS = CONSULTING_FOOTER_GROUPS;
+export const CYBER_FOOTER_LEGAL = CONSULTING_FOOTER_LEGAL;

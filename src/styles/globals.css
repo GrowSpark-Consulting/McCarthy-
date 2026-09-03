@@ -307,9 +307,15 @@
     scroll-behavior: auto !important;
   }
 
-  .lenis.lenis-stopped {
-    overflow: clip;
-  }
+  /* NOTE: `lenis.stop()` (only ever called while the mobile menu or search
+     overlay is open — see `useLockBodyScroll`) used to also set
+     `overflow: clip` on <html> here. That's stricter than `hidden`: some
+     mobile WebKit/Blink builds treat a clipped root as "nothing on this
+     document scrolls", which broke touch-scrolling inside the overlay's own
+     `overflow-y: auto` panel — the actual cause of the mobile nav not
+     scrolling. Background scroll is already fully locked via
+     `body.style.overflow = 'hidden'`, so the root does not need its own lock
+     too; removing it is what let the overlay's internal scroll work again. */
 
   @media (prefers-reduced-motion: reduce) {
     *,

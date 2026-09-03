@@ -57,7 +57,7 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
         transition: { duration: DURATION.base, ease: EASE.outQuint },
       }}
       transition={{ duration: DURATION.slow, ease: EASE.outExpo }}
-      className="bg-abyss-deep/98 fixed inset-0 z-60 flex flex-col overflow-y-auto overscroll-contain backdrop-blur-2xl lg:hidden"
+      className="bg-abyss-deep/98 fixed inset-0 z-60 flex flex-col overflow-hidden backdrop-blur-2xl lg:hidden"
     >
       <div className="flex h-[var(--header-band)] shrink-0 items-center justify-between px-[calc(var(--header-inset)+1rem)]">
         <Link href="/" onClick={onClose} aria-label={`${siteConfig.name} home`}>
@@ -78,7 +78,7 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
         variants={staggerContainer(ROW_STAGGER, 0.08)}
         initial="hidden"
         animate="visible"
-        className="container-page flex flex-1 flex-col gap-10 pt-4 pb-12"
+        className="container-page flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain pt-4 pb-12"
       >
         <nav aria-label="Primary" className="flex flex-col">
           {PRIMARY_NAV.map((item) => {
@@ -87,7 +87,11 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
               const panelId = `mobile-megamenu-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
               return (
-                <motion.div key={item.label} variants={fadeUp} className="border-ink-inverse/12 border-b">
+                <motion.div
+                  key={item.label}
+                  variants={fadeUp}
+                  className="border-ink-inverse/12 border-b"
+                >
                   <button
                     type="button"
                     aria-expanded={isOpen}
@@ -98,7 +102,9 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
                     <span
                       className={cn(
                         'text-h3 font-light transition-colors duration-[var(--duration-base)]',
-                        isOpen ? 'text-ink-inverse' : 'text-ink-inverse/85 group-hover/link:text-ink-inverse',
+                        isOpen
+                          ? 'text-ink-inverse'
+                          : 'text-ink-inverse/85 group-hover/link:text-ink-inverse',
                       )}
                     >
                       {item.label}
@@ -126,7 +132,9 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
                         <div className="flex flex-col gap-6 pb-7">
                           {item.megaMenu.columns.flat().map((column) => (
                             <div key={column.heading} className="flex flex-col gap-2.5">
-                              <p className="text-eyebrow text-ember-text uppercase">{column.heading}</p>
+                              <p className="text-eyebrow text-ember-text uppercase">
+                                {column.heading}
+                              </p>
                               <ul className="flex flex-col">
                                 {column.links.map((link) => (
                                   <li key={link.href}>

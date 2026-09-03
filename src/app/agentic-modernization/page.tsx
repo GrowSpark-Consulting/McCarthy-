@@ -5,13 +5,13 @@ import { CustomerSuccess } from '@/components/sections/agentic-modernization/cus
 import { Hero } from '@/components/sections/agentic-modernization/hero';
 import { HowMcCarthyHelps } from '@/components/sections/agentic-modernization/how-mccarthy-helps';
 import { Intro } from '@/components/sections/agentic-modernization/intro';
-import { LocalNav } from '@/components/sections/agentic-modernization/local-nav';
 import { RelatedCapabilities } from '@/components/sections/agentic-modernization/related-capabilities';
 import { Team } from '@/components/sections/agentic-modernization/team';
-import { Trends } from '@/components/sections/agentic-modernization/trends';
 import { ValueProps } from '@/components/sections/agentic-modernization/value-props';
 import { Connect } from '@/components/sections/connect';
-import { AMOD_CONNECT_CTA } from '@/content/agentic-modernization';
+import { LocalPageNav } from '@/components/shared/local-page-nav';
+import { TrendsGrid } from '@/components/shared/trends-grid';
+import { AMOD_BREADCRUMB, AMOD_CONNECT_CTA, AMOD_LOCAL_NAV, AMOD_TRENDS } from '@/content/agentic-modernization';
 import { siteConfig } from '@/lib/site-config';
 
 const DESCRIPTION =
@@ -56,12 +56,12 @@ export default function AgenticModernizationPage() {
   return (
     <>
       <div className="relative pb-16 lg:pb-24">
-        <LocalNav />
+        <LocalPageNav breadcrumb={AMOD_BREADCRUMB} items={AMOD_LOCAL_NAV} />
         <Hero />
         <Intro />
         <ValueProps />
         <HowMcCarthyHelps />
-        <Trends />
+        <TrendsGrid eyebrow={AMOD_TRENDS.eyebrow} heading={AMOD_TRENDS.heading} articles={AMOD_TRENDS.articles} />
         <CustomerSuccess />
         <RelatedCapabilities />
         <Team />

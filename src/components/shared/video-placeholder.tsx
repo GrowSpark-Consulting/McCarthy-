@@ -23,7 +23,7 @@ export function VideoPlaceholder({ imageSrc, caption, duration, className }: Vid
   return (
     <div
       role="img"
-      aria-label={`Video placeholder: ${caption}`}
+      aria-label={caption ? `Video placeholder: ${caption}` : 'Video placeholder'}
       className={cn('relative overflow-hidden rounded-[var(--radius-panel)]', className)}
     >
       <Image src={imageSrc} alt="" fill sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover" />
@@ -37,7 +37,7 @@ export function VideoPlaceholder({ imageSrc, caption, duration, className }: Vid
       </div>
 
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 p-5 lg:p-6">
-        <p className="text-body text-ink-inverse">{caption}</p>
+        {caption ? <p className="text-body text-ink-inverse">{caption}</p> : <span />}
         <p className="text-legal text-ink-inverse/80 shrink-0">{duration}</p>
       </div>
     </div>

@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 export interface Capability {
   readonly title: string;
   readonly body: string;
+  /** A short label above the title, e.g. "with Cloud Consulting" — omit when the source doesn't pair one. */
+  readonly tag?: string;
 }
 
 export interface CapabilityTab {
@@ -102,7 +104,12 @@ export function CapabilityTabs({ id, eyebrow, heading, tabs }: CapabilityTabsPro
                 {activeTab.capabilities.map((capability) => (
                   <article key={capability.title} className="flex flex-col">
                     <span aria-hidden="true" className="bg-ember block h-[2px] w-7" />
-                    <h3 className="text-card text-ink mt-5">{capability.title}</h3>
+                    {capability.tag ? (
+                      <p className="text-eyebrow text-ember mt-5 uppercase">{capability.tag}</p>
+                    ) : null}
+                    <h3 className={cn('text-card text-ink', capability.tag ? 'mt-2' : 'mt-5')}>
+                      {capability.title}
+                    </h3>
                     <p className="text-body text-ink-muted mt-4">{capability.body}</p>
                   </article>
                 ))}

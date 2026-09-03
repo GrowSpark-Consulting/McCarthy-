@@ -121,7 +121,7 @@ export function Connect(props: ConnectProps = {}) {
             {heading}
           </h2>
 
-          <p className={cn('text-body mt-5 max-w-[46ch]', palette.body)}>{body}</p>
+          {body ? <p className={cn('text-body mt-5 max-w-[46ch]', palette.body)}>{body}</p> : null}
 
           <div className="mt-8 flex flex-col items-start gap-4">
             {tone === 'dark' ? (

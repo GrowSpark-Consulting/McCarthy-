@@ -1,12 +1,7 @@
-import { VideoPlaceholder } from '@/components/shared/video-placeholder';
+import Image from 'next/image';
+
 import { CYBER_WHAT_WE_DO } from '@/content/cyber-resilience';
 
-/**
- * "WHAT WE DO" — the brief explicitly calls for a video block here
- * ("(video placeholder — 0:00 / [runtime])"), with no caption text supplied.
- * Reuses the wave art already used for this page's own hero is avoided —
- * the office-dashboard photo reads as a security-operations scene instead.
- */
 export function WhatWeDo() {
   return (
     <section id="what-we-do" className="bg-canvas scroll-mt-32 py-[var(--section-py)]">
@@ -14,11 +9,15 @@ export function WhatWeDo() {
         <h2 className="text-h2-soft text-ink max-w-[40ch]">{CYBER_WHAT_WE_DO.heading}</h2>
 
         <div className="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-2 lg:gap-14">
-          <VideoPlaceholder
-            imageSrc="/videos/wave-loop-poster.jpg"
-            duration={CYBER_WHAT_WE_DO.video.duration}
-            className="aspect-video"
-          />
+          <div className="relative aspect-video overflow-hidden rounded-[var(--radius-panel)]">
+            <Image
+              src="/videos/wave-loop-poster.jpg"
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              className="object-cover"
+            />
+          </div>
 
           <div className="flex flex-col gap-6">
             {CYBER_WHAT_WE_DO.bodyParagraphs.map((paragraph) => (

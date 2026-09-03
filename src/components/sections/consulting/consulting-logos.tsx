@@ -31,7 +31,7 @@ export function ConsultingLogos({ id, heading, clients }: ConsultingLogosProps) 
           {clients.map((client) => (
             <li
               key={client}
-              className="border-hairline text-body text-ink-muted flex h-24 items-center justify-center border px-4 text-center"
+              className="border-hairline text-body text-ink-muted flex min-h-24 items-center justify-center border px-4 text-center"
             >
               {client}
             </li>

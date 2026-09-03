@@ -189,6 +189,14 @@
   /* Hero occupies ~89% of the viewport (804/900 measured). */
   --hero-height: min(89svh, 50.25rem);
 
+  /* Minimum hero height for routes that don't use `--hero-height` — matches
+     the `min-h-[26rem] sm:min-h-[30rem] lg:min-h-[32rem]` rhythm shared by
+     `ServicesHero`/`IndustryHero`, the pattern most subpages use. Consumed by
+     `app/loading.tsx` so the route-transition skeleton reserves the same
+     space a real hero will occupy, instead of collapsing to its own content
+     height and shifting layout once the page loads. */
+  --hero-min-height: 26rem;
+
   /* Container: 1376px of content inside a 1440px frame (measured — news cards
      sit at x=32 and are 437px wide with 32px gaps at a 1440 viewport). */
   --page-gutter: 1.25rem; /* 20px */
@@ -211,6 +219,7 @@
   :root {
     --page-gutter: 1.5rem; /* 24px */
     --header-height: 3.75rem; /* 60px */
+    --hero-min-height: 30rem;
   }
 }
 
@@ -220,6 +229,7 @@
     --header-height: 4.25rem; /* 68px */
     --section-py: 5rem;
     --hero-content-gap: 11.5rem; /* 184px */
+    --hero-min-height: 32rem;
   }
 }
 

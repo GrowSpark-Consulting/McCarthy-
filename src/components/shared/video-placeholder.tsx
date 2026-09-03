@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils';
 
 interface VideoPlaceholderProps {
   readonly imageSrc: string;
-  readonly caption: string;
+  /** Omit when the source content doesn't supply a caption. */
+  readonly caption?: string;
   /** e.g. "0:00 / [runtime]" — kept as supplied, not a real duration. */
   readonly duration: string;
   readonly className?: string;

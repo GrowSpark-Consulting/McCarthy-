@@ -10,7 +10,8 @@ interface ExpertVoiceProps {
   readonly quote: string;
   readonly name: string;
   readonly title: string;
-  readonly profileLink: LinkRef;
+  /** Omit when the source content doesn't supply a profile link — no destination is invented. */
+  readonly profileLink?: LinkRef;
 }
 
 /**
@@ -43,11 +44,13 @@ export function ExpertVoice({ id, heading, quote, name, title, profileLink }: Ex
             <p className="text-body text-ink-inverse/70 mt-1">{title}</p>
             <p className="text-legal text-ink-inverse/70">McCarthy</p>
 
-            <div className="mt-4">
-              <ArrowLink href={profileLink.href} tone="inverse">
-                {profileLink.label}
-              </ArrowLink>
-            </div>
+            {profileLink ? (
+              <div className="mt-4">
+                <ArrowLink href={profileLink.href} tone="inverse">
+                  {profileLink.label}
+                </ArrowLink>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

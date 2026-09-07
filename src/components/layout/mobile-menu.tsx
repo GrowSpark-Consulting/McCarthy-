@@ -78,7 +78,8 @@ export function MobileMenu({ id, onClose, onOpenSearch }: MobileMenuProps) {
         variants={staggerContainer(ROW_STAGGER, 0.08)}
         initial="hidden"
         animate="visible"
-        className="container-page flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain pt-4 pb-12"
+        data-lenis-prevent
+        className="container-page flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overscroll-contain touch-pan-y pt-4 pb-12"
       >
         <nav aria-label="Primary" className="flex flex-col">
           {PRIMARY_NAV.map((item) => {

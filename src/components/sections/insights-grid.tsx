@@ -1,6 +1,7 @@
+import Image from 'next/image';
+
 import { ArrowLink } from '@/components/shared/arrow-link';
 import { Eyebrow } from '@/components/shared/eyebrow';
-import { PlaceholderFrame } from '@/components/shared/placeholder-frame';
 import { ARTICLES } from '@/content/homepage';
 
 /**
@@ -25,12 +26,22 @@ export function InsightsGrid() {
           {ARTICLES.map((article, index) => (
             <article
               key={article.link.href}
-              className={index === 0 ? 'flex flex-col lg:col-span-2' : 'flex flex-col'}
+              className={index === 0 ? 'group flex flex-col lg:col-span-2' : 'group flex flex-col'}
             >
-              <PlaceholderFrame
-                label="Article artwork"
-                className={index === 0 ? 'h-[14.75rem]' : 'h-[14.75rem]'}
-              />
+              <div className="relative h-[14.75rem] overflow-hidden">
+                <div
+                  className="absolute inset-0"
+                  style={article.image.trim ? { transform: `scale(${article.image.trim})` } : undefined}
+                >
+                  <Image
+                    src={article.image.src}
+                    alt={article.image.alt}
+                    fill
+                    sizes={index === 0 ? '(min-width: 1024px) 50vw, 100vw' : '(min-width: 1024px) 33vw, 100vw'}
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  />
+                </div>
+              </div>
 
               <div className="mt-6">
                 <Eyebrow>{article.eyebrow}</Eyebrow>

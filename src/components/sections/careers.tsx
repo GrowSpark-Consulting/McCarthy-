@@ -1,5 +1,6 @@
+import Image from 'next/image';
+
 import { BrandWordmark } from '@/components/shared/brand-wordmark';
-import { PlaceholderFrame } from '@/components/shared/placeholder-frame';
 import { TypeBreak } from '@/components/shared/type-break';
 import { ButtonLink } from '@/components/ui/button';
 import { CAREERS } from '@/content/homepage';
@@ -8,10 +9,13 @@ import { PREFETCH_SITE_ROUTES } from '@/lib/navigation';
 /**
  * Sections 19–20 — the careers composition.
  *
- * Three columns in the reference: a full-bleed portrait, an ember panel
+ * Three columns in the reference: a full-bleed team photo, an ember panel
  * carrying the wordmark, and a text column with two blocks separated by a
  * hairline. The reference's first block is an employer award; McCarthy has none,
  * so it states something true about joining a small team instead.
+ *
+ * The photo is landscape, so below `lg` its slot is landscape too rather than
+ * the desktop column's tall crop.
  */
 export function Careers() {
   return (
@@ -29,10 +33,15 @@ export function Careers() {
         </h2>
 
         <div className="grid lg:grid-cols-[minmax(0,420fr)_minmax(0,420fr)_minmax(0,600fr)]">
-          <PlaceholderFrame
-            label="Team photography"
-            className="aspect-[4/5] lg:aspect-auto lg:min-h-[40rem]"
-          />
+          <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[16/10] lg:aspect-auto lg:min-h-[40rem]">
+            <Image
+              src={CAREERS.image.src}
+              alt={CAREERS.image.alt}
+              fill
+              sizes="(min-width: 1024px) 85vw, 100vw"
+              className="object-cover object-[42%_center]"
+            />
+          </div>
 
           <div className="bg-ember flex min-h-[18rem] items-center justify-center p-8 lg:min-h-[40rem]">
             <BrandWordmark size="lg" tone="light" withPeriod={false} />

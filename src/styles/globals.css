@@ -64,7 +64,9 @@
   --text-hero--letter-spacing: -0.01em;
   --text-hero--font-weight: 300;
 
-  --text-break: clamp(2.75rem, 0.5rem + 9.5vw, 9rem);
+  /* Pure-vw middle term so the longest break ("how mccarthy helps", ~9.2em
+     wide) still fits a 320px phone; caps at the reference's 144px. */
+  --text-break: clamp(2rem, 10.4vw, 9rem);
   --text-break--line-height: 0.75;
   --text-break--letter-spacing: -0.01em;
   --text-break--font-weight: 700;
@@ -228,7 +230,8 @@
     --page-gutter: 2rem; /* 32px */
     --header-height: 4.25rem; /* 68px */
     --section-py: 5rem;
-    --hero-content-gap: 11.5rem; /* 184px */
+    /* 184px at the 900px-tall reference; tighter on short laptop viewports. */
+    --hero-content-gap: clamp(4.5rem, 20.5svh, 11.5rem);
     --hero-min-height: 32rem;
   }
 }

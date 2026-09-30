@@ -73,7 +73,7 @@ export function TrustPanels() {
                 <div
                   key={panel.index}
                   className={cn(
-                    'relative flex min-w-0 overflow-hidden transition-[flex-grow] duration-[var(--duration-slow)] ease-[var(--ease-out-expo)]',
+                    'relative flex min-w-0 flex-col overflow-hidden transition-[flex-grow] duration-[var(--duration-slow)] ease-[var(--ease-out-expo)]',
                     TONE_CLASS[panel.tone],
                     isActive ? 'lg:grow-[10]' : 'lg:grow',
                   )}
@@ -93,8 +93,8 @@ export function TrustPanels() {
 
                     <span
                       className={cn(
-                        'flex flex-col gap-4 transition-opacity duration-[var(--duration-base)]',
-                        isActive ? 'opacity-100' : 'opacity-0 lg:hidden',
+                        'flex flex-col gap-4 opacity-100 transition-opacity duration-[var(--duration-base)]',
+                        !isActive && 'lg:opacity-0 lg:hidden',
                       )}
                     >
                       <span className="text-h3-solid text-ink-inverse max-w-[22ch]">
@@ -109,13 +109,16 @@ export function TrustPanels() {
                     <span className="sr-only">{panel.title}</span>
                   </button>
 
-                  {isActive ? (
-                    <div className="absolute bottom-8 left-8 lg:bottom-10 lg:left-10">
-                      <ArrowLink href={panel.link.href} tone="inverse">
-                        {panel.link.label}
-                      </ArrowLink>
-                    </div>
-                  ) : null}
+                  <div
+                    className={cn(
+                      'px-8 pb-8 lg:absolute lg:bottom-10 lg:left-10 lg:px-0 lg:pb-0',
+                      !isActive && 'lg:hidden',
+                    )}
+                  >
+                    <ArrowLink href={panel.link.href} tone="inverse">
+                      {panel.link.label}
+                    </ArrowLink>
+                  </div>
                 </div>
               );
             })}

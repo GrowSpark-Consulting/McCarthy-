@@ -1,7 +1,16 @@
 import Image from 'next/image';
 
 import { ArrowLink } from '@/components/shared/arrow-link';
-import { PARTNERS } from '@/content/homepage';
+import { PARTNERS, type LinkRef, type PartnerLogo } from '@/content/homepage';
+import { cn } from '@/lib/utils';
+
+interface PartnersProps {
+  readonly id?: string;
+  readonly heading?: string;
+  readonly link?: LinkRef;
+  readonly logos?: readonly PartnerLogo[];
+  readonly className?: string;
+}
 
 /**
  * Section 18 — the platform band.
@@ -13,21 +22,33 @@ import { PARTNERS } from '@/content/homepage';
  *
  * Each logo keeps its own intrinsic ratio inside a fixed-height box, so a wide
  * mark and a square one sit on the same optical baseline.
+ *
+ * Content defaults to the homepage's own `PARTNERS` copy and logo set, so the
+ * existing bare `<Partners />` call is unaffected; other pages pass their own
+ * `heading`/`link` to reuse the same logo strip under different wording (e.g.
+ * a consulting subpage's "Our partners" section) without duplicating this
+ * markup or re-uploading the same marks.
  */
-export function Partners() {
+export function Partners({
+  id,
+  heading = PARTNERS.heading,
+  link = PARTNERS.link,
+  logos = PARTNERS.logos,
+  className,
+}: PartnersProps = {}) {
   return (
-    <section aria-labelledby="partners-heading" className="bg-canvas py-[var(--section-py)]">
+    <section id={id} aria-labelledby="partners-heading" className={cn('bg-canvas scroll-mt-32 py-[var(--section-py)]', className)}>
       <div className="container-page">
         <h2 id="partners-heading" className="text-h3-lg text-ink-muted">
-          {PARTNERS.heading}
+          {heading}
         </h2>
 
         <div className="mt-4">
-          <ArrowLink href={PARTNERS.link.href}>{PARTNERS.link.label}</ArrowLink>
+          <ArrowLink href={link.href}>{link.label}</ArrowLink>
         </div>
 
         <ul className="mt-12 grid grid-cols-2 items-center gap-x-8 gap-y-10 sm:grid-cols-3 lg:mt-16 lg:grid-cols-5 lg:gap-x-12">
-          {PARTNERS.logos.map((logo) => (
+          {logos.map((logo) => (
             <li key={logo.src} className="flex items-center justify-center">
               <Image
                 src={logo.src}

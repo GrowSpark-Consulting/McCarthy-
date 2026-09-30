@@ -140,7 +140,7 @@
 
   /* ---- Radii ------------------------------------------------------------- */
   --radius-control: 0.25rem; /* buttons, inputs — 4px */
-  --radius-bar: 0.5rem; /* floating header bar */
+  --radius-bar: 0.75rem; /* floating header bar — 12px */
   --radius-panel: 1rem; /* recognition band */
   --radius-pill: 62.4375rem;
 
@@ -155,8 +155,8 @@
   --duration-reveal: 900ms;
 
   /* ---- Elevation --------------------------------------------------------- */
-  --shadow-bar: 0 2px 18px -6px rgb(0 0 0 / 0.35);
-  --shadow-tabs: 0 6px 24px -10px rgb(0 0 0 / 0.22);
+  --shadow-bar: 0 4px 10px rgb(0 0 0 / 0.06); /* glass header bar */
+  --shadow-tabs: 0 8px 24px rgb(0 0 0 / 0.08); /* glass section-tab pill */
 
   /* ---- Animations -------------------------------------------------------- */
   --animate-drift-slow: drift-slow 26s var(--ease-in-out-soft) infinite;
@@ -168,13 +168,41 @@
 
 /* ---- Layout constants ----------------------------------------------------- */
 :root {
-  /* Floating header bar: 16px inset, 60px tall (measured). */
+  /* Floating header bar: 16px inset on every edge; 56px tall on handsets,
+     60px from sm, 68px from lg — the reference's proportions, never so tall
+     that it competes with the hero. */
   --header-inset: 1rem;
-  --header-height: 3.75rem;
+  --header-height: 3.5rem;
   --header-band: calc(var(--header-height) + var(--header-inset) * 2);
+
+  /* Nav glass shell. One surface across four grounds: floating on a full-bleed
+     hero, over a light page, once the page has scrolled, and while the bar is
+     pointed at or holding a panel open. Never opaque — the hero has to stay
+     visible through it. */
+  --nav-glass-bg: rgb(255 255 255 / 0.55);
+  --nav-glass-bg-page: rgb(255 255 255 / 0.66);
+  --nav-glass-bg-scrolled: rgb(255 255 255 / 0.82);
+  --nav-glass-bg-active: rgb(255 255 255 / 0.92);
+  --nav-glass-border: rgb(255 255 255 / 0.3);
+  --nav-glass-blur: 20px;
+  --nav-glass-saturate: 120%;
+
+  /* Utility controls (search, menu) inside the shell — the same glass, one
+     step lighter, so they never read as heavy dark circles. */
+  --nav-control-bg: rgb(255 255 255 / 0.5);
+  --nav-control-bg-hover: rgb(255 255 255 / 0.85);
+  --nav-control-border: rgb(41 39 31 / 0.16);
 
   /* Hero occupies ~89% of the viewport (804/900 measured). */
   --hero-height: min(89svh, 50.25rem);
+
+  /* Minimum hero height for routes that don't use `--hero-height` — matches
+     the `min-h-[26rem] sm:min-h-[30rem] lg:min-h-[32rem]` rhythm shared by
+     `ServicesHero`/`IndustryHero`, the pattern most subpages use. Consumed by
+     `app/loading.tsx` so the route-transition skeleton reserves the same
+     space a real hero will occupy, instead of collapsing to its own content
+     height and shifting layout once the page loads. */
+  --hero-min-height: 26rem;
 
   /* Container: 1376px of content inside a 1440px frame (measured — news cards
      sit at x=32 and are 437px wide with 32px gaps at a 1440 viewport). */
@@ -197,14 +225,18 @@
 @media (min-width: 40rem) {
   :root {
     --page-gutter: 1.5rem; /* 24px */
+    --header-height: 3.75rem; /* 60px */
+    --hero-min-height: 30rem;
   }
 }
 
 @media (min-width: 64rem) {
   :root {
     --page-gutter: 2rem; /* 32px */
+    --header-height: 4.25rem; /* 68px */
     --section-py: 5rem;
     --hero-content-gap: 11.5rem; /* 184px */
+    --hero-min-height: 32rem;
   }
 }
 
@@ -292,9 +324,15 @@
     scroll-behavior: auto !important;
   }
 
-  .lenis.lenis-stopped {
-    overflow: clip;
-  }
+  /* NOTE: `lenis.stop()` (only ever called while the mobile menu or search
+     overlay is open — see `useLockBodyScroll`) used to also set
+     `overflow: clip` on <html> here. That's stricter than `hidden`: some
+     mobile WebKit/Blink builds treat a clipped root as "nothing on this
+     document scrolls", which broke touch-scrolling inside the overlay's own
+     `overflow-y: auto` panel — the actual cause of the mobile nav not
+     scrolling. Background scroll is already fully locked via
+     `body.style.overflow = 'hidden'`, so the root does not need its own lock
+     too; removing it is what let the overlay's internal scroll work again. */
 
   @media (prefers-reduced-motion: reduce) {
     *,

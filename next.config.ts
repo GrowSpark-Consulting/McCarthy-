@@ -26,6 +26,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
+  async redirects() {
+    return [
+      // The Labs page lives at the route the navigation has always used.
+      { source: '/mccarthy-labs', destination: '/ai-lab', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

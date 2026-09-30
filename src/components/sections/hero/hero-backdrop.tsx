@@ -54,11 +54,16 @@ export function HeroBackdrop() {
         </div>
       )}
 
-      {/* Legibility scrims — heavier below lg where the copy spans more width,
-          and a deeper foot so the slide dots stay legible over bright footage. */}
-      <div className="from-abyss-deep via-abyss-deep/72 to-abyss-deep/15 lg:from-abyss-deep/95 lg:via-abyss-deep/35 absolute inset-0 bg-gradient-to-r lg:to-transparent" />
-      <div className="from-abyss-deep/80 absolute inset-x-0 top-0 h-36 bg-gradient-to-b to-transparent" />
-      <div className="from-abyss-deep/92 via-abyss-deep/45 absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t to-transparent" />
+      {/* Legibility scrims, localised to the copy. Pitched at the reference's
+          brightness: the footage is meant to read as a lit room, not a dark
+          plate, so on lg the left scrim carries the headline and then clears
+          entirely by mid-frame, and the foot is a light touch for the slide
+          dots. Nothing darkens the top band any more — the floating bar earns
+          its own readability from glass, blur and a white tint, so the footage
+          stays bright behind it. Below lg the copy spans the full width over a
+          tighter crop, so it still needs a real gradient. */}
+      <div className="from-abyss-deep/92 via-abyss-deep/62 to-abyss-deep/12 lg:from-abyss-deep/62 lg:via-abyss-deep/14 absolute inset-0 bg-gradient-to-r lg:to-transparent" />
+      <div className="from-abyss-deep/58 via-abyss-deep/18 absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t to-transparent" />
     </div>
   );
 }

@@ -58,16 +58,16 @@ export function SearchOverlay({ id, onClose }: SearchOverlayProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: DURATION.fast, ease: EASE.outQuint } }}
       transition={{ duration: DURATION.base, ease: EASE.outExpo }}
-      className="bg-abyss-deep/97 fixed inset-0 z-70 overflow-y-auto overscroll-contain backdrop-blur-2xl"
+      className="bg-abyss-deep/97 fixed inset-0 z-70 flex flex-col overflow-hidden backdrop-blur-2xl"
     >
       <motion.div
         initial={{ y: -20 }}
         animate={{ y: 0 }}
         exit={{ y: -14 }}
         transition={{ duration: DURATION.slow, ease: EASE.outExpo }}
-        className="container-page pb-16"
+        className="container-page flex min-h-0 flex-1 flex-col pb-8"
       >
-        <div className="flex h-[var(--header-band)] items-center justify-end">
+        <div className="flex h-[var(--header-band)] shrink-0 items-center justify-end">
           <button
             type="button"
             aria-label="Close search"
@@ -78,7 +78,7 @@ export function SearchOverlay({ id, onClose }: SearchOverlayProps) {
           </button>
         </div>
 
-        <form role="search" onSubmit={handleSubmit} className="mt-4">
+        <form role="search" onSubmit={handleSubmit} className="mt-4 shrink-0">
           <label htmlFor="site-search-input" className="text-eyebrow text-ink-inverse/60 uppercase">
             Search
           </label>
@@ -108,41 +108,45 @@ export function SearchOverlay({ id, onClose }: SearchOverlayProps) {
           {`${results.length} ${results.length === 1 ? 'result' : 'results'} available.`}
         </p>
 
-        <motion.ul
-          variants={staggerContainer(RESULT_STAGGER, 0.05)}
-          initial="hidden"
-          animate="visible"
-          className="mt-8 flex flex-col"
-        >
-          {results.map((destination) => (
-            <motion.li key={destination.href} variants={fadeUp}>
-              <Link
-                href={destination.href}
-                prefetch={PREFETCH_SITE_ROUTES}
-                onClick={onClose}
-                className="group/link border-ink-inverse/12 text-ink-inverse/85 hover:text-ink-inverse flex items-center justify-between gap-6 border-b py-5 transition-colors"
-              >
-                <span className="flex flex-col gap-1">
-                  <span className="text-body-lg">{destination.label}</span>
-                  {destination.description ? (
-                    <span className="text-body text-ink-inverse/55">{destination.description}</span>
-                  ) : null}
-                </span>
-                <ChevronRight
-                  aria-hidden="true"
-                  strokeWidth={1.5}
-                  className="text-ink-inverse/50 size-5 shrink-0 transition-transform group-hover/link:translate-x-1"
-                />
-              </Link>
-            </motion.li>
-          ))}
-        </motion.ul>
+        <div className="mt-8 min-h-0 flex-1 overflow-y-auto overscroll-contain pb-8">
+          <motion.ul
+            variants={staggerContainer(RESULT_STAGGER, 0.05)}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col"
+          >
+            {results.map((destination) => (
+              <motion.li key={destination.href} variants={fadeUp}>
+                <Link
+                  href={destination.href}
+                  prefetch={PREFETCH_SITE_ROUTES}
+                  onClick={onClose}
+                  className="group/link border-ink-inverse/12 text-ink-inverse/85 hover:text-ink-inverse flex items-center justify-between gap-6 border-b py-5 transition-colors"
+                >
+                  <span className="flex flex-col gap-1">
+                    <span className="text-body-lg">{destination.label}</span>
+                    {destination.description ? (
+                      <span className="text-body text-ink-inverse/55">
+                        {destination.description}
+                      </span>
+                    ) : null}
+                  </span>
+                  <ChevronRight
+                    aria-hidden="true"
+                    strokeWidth={1.5}
+                    className="text-ink-inverse/50 size-5 shrink-0 transition-transform group-hover/link:translate-x-1"
+                  />
+                </Link>
+              </motion.li>
+            ))}
+          </motion.ul>
 
-        {results.length === 0 ? (
-          <p className="text-body-lg text-ink-inverse/70 mt-8">
-            Nothing matches “{query}”. Try “agents”, “workforce” or “Lab”.
-          </p>
-        ) : null}
+          {results.length === 0 ? (
+            <p className="text-body-lg text-ink-inverse/70 mt-8">
+              Nothing matches “{query}”. Try “agents”, “workforce” or “Lab”.
+            </p>
+          ) : null}
+        </div>
       </motion.div>
     </motion.div>
   );

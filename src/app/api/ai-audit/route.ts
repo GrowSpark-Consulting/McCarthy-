@@ -13,6 +13,14 @@ import { aiAuditRequestSchema, type AiAuditRequest } from '@/lib/validation/ai-a
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+/**
+ * Worst case is one POST plus three reads of the result at up to 10s each. On
+ * Vercel's network a submission takes 1-3s; the ceiling covers a cold start
+ * without letting the platform kill the function between saving the lead and
+ * confirming it.
+ */
+export const maxDuration = 60;
+
 /** Submissions allowed per IP per window. */
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_SECONDS = 600;

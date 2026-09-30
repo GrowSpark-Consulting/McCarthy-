@@ -3,16 +3,13 @@ import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 
 import {
-  isEmailConfigured,
-  notificationRecipient,
-  sendAuditConfirmation,
-  sendAuditNotification,
-} from '@/lib/server/email';
-import { appendSheetRow, isSheetsConfigured } from '@/lib/server/google-sheets';
+  isAppsScriptConfigured,
+  submitToAppsScript,
+  toAppsScriptPayload,
+} from '@/lib/server/apps-script';
 import { clientIpFrom, rateLimit } from '@/lib/server/rate-limit';
 import { aiAuditRequestSchema, type AiAuditRequest } from '@/lib/validation/ai-audit';
 
-/** Node runtime: the Sheets JWT is signed with `node:crypto`. */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
@@ -23,43 +20,49 @@ const RATE_LIMIT_WINDOW_SECONDS = 600;
 /** How long an identical submission is treated as a duplicate click. */
 const DEDUPE_WINDOW_SECONDS = 180;
 
-/** Hard ceiling on the request body. The schema's own limits are well inside this. */
-const MAX_BODY_BYTES = 16 * 1024;
+/** Hard ceiling on the request body. The schema's own limits sit well inside it. */
+const MAX_BODY_BYTES = 32 * 1024;
 
-type ApiError = { readonly error: string; readonly fields?: Record<string, string> };
+/** The single message shown to a visitor when delivery fails. */
+const DELIVERY_FAILURE_MESSAGE = "We couldn't submit your request right now. Please try again.";
 
-function errorResponse(status: number, body: ApiError, headers?: HeadersInit) {
-  return NextResponse.json(body, { status, headers });
+interface ErrorBody {
+  readonly success: false;
+  readonly message: string;
+  readonly fields?: Record<string, string>;
 }
 
-/** Formats a value for a spreadsheet cell. */
-function cell(value: string | undefined): string {
-  return value ?? '';
+function fail(status: number, body: ErrorBody, headers?: HeadersInit) {
+  return NextResponse.json(body, { status, headers });
 }
 
 /**
  * POST /api/ai-audit
  *
  * Pipeline: size check → JSON parse → schema validation (which also enforces
- * the honeypot) → rate limit → duplicate suppression → Google Sheets append →
- * notification and confirmation emails.
+ * the honeypot) → rate limit → duplicate suppression → Google Apps Script.
  *
- * The Sheets write is the operation that decides success: if the lead is
- * recorded, the request succeeds even when email delivery fails, because a
- * captured lead with a missing notification is recoverable and a lost lead is
- * not. Email failures are logged.
+ * Apps Script owns the Google side: it appends the row and sends the single
+ * admin notification through Gmail. This app therefore holds no Google
+ * credentials — only the deployment URL, server-side.
+ *
+ * No email is ever sent to the person who submitted the form. The success
+ * message on the page is UI only.
+ *
+ * Google's own error text never reaches the browser: failures are logged in
+ * full and answered with one generic message.
  */
 export async function POST(request: Request): Promise<NextResponse> {
   const declaredLength = Number(request.headers.get('content-length') ?? '0');
 
   if (declaredLength > MAX_BODY_BYTES) {
-    return errorResponse(413, { error: 'That request was too large.' });
+    return fail(413, { success: false, message: 'That request was too large.' });
   }
 
   const raw = await request.text();
 
   if (raw.length > MAX_BODY_BYTES) {
-    return errorResponse(413, { error: 'That request was too large.' });
+    return fail(413, { success: false, message: 'That request was too large.' });
   }
 
   let payload: unknown;
@@ -67,14 +70,12 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     payload = JSON.parse(raw);
   } catch {
-    return errorResponse(400, { error: 'We could not read that request.' });
+    return fail(400, { success: false, message: 'We could not read that request.' });
   }
 
   const parsed = aiAuditRequestSchema.safeParse(payload);
 
   if (!parsed.success) {
-    // Field-level messages so the form can highlight the offending inputs;
-    // nothing internal is exposed.
     const fields: Record<string, string> = {};
 
     for (const issue of parsed.error.issues) {
@@ -84,7 +85,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     }
 
-    return errorResponse(422, { error: 'Please check the highlighted fields.', fields });
+    return fail(422, {
+      success: false,
+      message: 'Please check the highlighted fields.',
+      fields,
+    });
   }
 
   const data: AiAuditRequest = parsed.data;
@@ -93,109 +98,50 @@ export async function POST(request: Request): Promise<NextResponse> {
   const limit = await rateLimit(ip, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_SECONDS);
 
   if (!limit.allowed) {
-    return errorResponse(
+    return fail(
       429,
-      { error: 'Too many requests. Please try again shortly.' },
+      { success: false, message: 'Too many requests. Please try again shortly.' },
       { 'Retry-After': String(limit.retryAfter) },
     );
   }
 
-  // Suppress duplicate rows from double-clicks or a retried request.
+  // Suppress duplicate rows from a double click or a retried request.
   const fingerprint = createHash('sha256')
-    .update(`${data.email}|${data.company}|${data.challenge ?? ''}`)
+    .update(`${data.email}|${data.company}|${data.challenge}`)
     .digest('hex')
     .slice(0, 32);
 
   const duplicate = await rateLimit(`dupe:${fingerprint}`, 1, DEDUPE_WINDOW_SECONDS);
 
   if (!duplicate.allowed) {
-    // Report success: the visitor's first submission was accepted, and showing
-    // an error for their second click would be wrong.
-    return NextResponse.json({ ok: true, duplicate: true });
+    // The first submission was accepted; showing an error for the second click
+    // would be wrong, and re-posting would create a second row.
+    return NextResponse.json({ success: true, message: 'AI Audit request received successfully' });
   }
 
-  const submittedAt = new Date().toISOString();
-  const goals = data.goals.join(', ');
-
-  const sheetsReady = isSheetsConfigured();
-  const emailReady = isEmailConfigured();
-
-  if (!sheetsReady && !emailReady) {
+  if (!isAppsScriptConfigured()) {
     if (process.env.NODE_ENV === 'development') {
-      // Lets the full client experience be exercised locally without secrets.
-      console.warn('[ai-audit] no sink configured; logging submission instead', {
-        ...data,
-        submittedAt,
-      });
-      return NextResponse.json({ ok: true, delivered: 'log' });
+      // Lets the full client experience be exercised locally without a
+      // deployed Apps Script.
+      console.warn('[ai-audit] GOOGLE_APPS_SCRIPT_URL unset; logging submission instead', data);
+      return NextResponse.json({ success: true, message: 'Logged (development only)' });
     }
 
-    console.error('[ai-audit] no delivery target configured');
-    return errorResponse(503, {
-      error: 'Submissions are temporarily unavailable. Please email us directly.',
-    });
+    console.error('[ai-audit] GOOGLE_APPS_SCRIPT_URL is not configured');
+    return fail(500, { success: false, message: DELIVERY_FAILURE_MESSAGE });
   }
 
-  if (sheetsReady) {
-    try {
-      await appendSheetRow([
-        submittedAt,
-        data.fullName,
-        data.email,
-        data.company,
-        cell(data.jobTitle),
-        cell(data.website),
-        cell(data.industry),
-        cell(data.companySize),
-        goals,
-        cell(data.challenge),
-        data.preferredContact,
-        cell(data.additionalInfo),
-      ]);
-    } catch (error) {
-      console.error('[ai-audit] sheets append failed', error);
-
-      // Without email as a backstop there is nowhere left to put the lead.
-      if (!emailReady || !notificationRecipient()) {
-        return errorResponse(502, {
-          error: 'We could not record your request. Please try again in a moment.',
-        });
-      }
-    }
+  try {
+    await submitToAppsScript(toAppsScriptPayload(data));
+  } catch (error) {
+    console.error('[ai-audit] Apps Script delivery failed', error);
+    return fail(500, { success: false, message: DELIVERY_FAILURE_MESSAGE });
   }
 
-  if (emailReady) {
-    const results = await Promise.allSettled([
-      notificationRecipient()
-        ? sendAuditNotification({
-            fullName: data.fullName,
-            email: data.email,
-            company: data.company,
-            jobTitle: cell(data.jobTitle),
-            website: cell(data.website),
-            industry: cell(data.industry),
-            companySize: cell(data.companySize),
-            goals,
-            challenge: cell(data.challenge),
-            preferredContact: data.preferredContact,
-            additionalInfo: cell(data.additionalInfo),
-            submittedAt,
-          })
-        : Promise.resolve(),
-      sendAuditConfirmation(data.fullName, data.email),
-    ]);
-
-    for (const result of results) {
-      if (result.status === 'rejected') {
-        console.error('[ai-audit] email delivery failed', result.reason);
-      }
-    }
-  }
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ success: true, message: 'AI Audit request received successfully' });
 }
 
 /** Anything other than POST is not part of this endpoint's contract. */
 export async function GET(): Promise<NextResponse> {
-  return errorResponse(405, { error: 'Method not allowed.' }, { Allow: 'POST' });
+  return fail(405, { success: false, message: 'Method not allowed.' }, { Allow: 'POST' });
 }

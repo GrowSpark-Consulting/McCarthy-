@@ -33,7 +33,8 @@ const ENDPOINT = '/api/ai-audit';
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 
 interface ApiErrorBody {
-  readonly error?: string;
+  readonly success?: boolean;
+  readonly message?: string;
   readonly fields?: Record<string, string>;
 }
 
@@ -105,7 +106,7 @@ export function AuditForm() {
           }
         }
 
-        setFormError(body.error ?? 'Something went wrong. Please try again.');
+        setFormError(body.message ?? 'Something went wrong. Please try again.');
         setState('error');
       } catch {
         setFormError('We could not reach the server. Check your connection and try again.');
@@ -289,6 +290,7 @@ export function AuditForm() {
               <Field
                 label="Tell us about your challenge"
                 htmlFor="challenge"
+                required
                 error={errors.challenge?.message}
               >
                 <TextArea
@@ -296,6 +298,7 @@ export function AuditForm() {
                   placeholder="What are you currently trying to improve or automate?"
                   invalid={Boolean(errors.challenge)}
                   aria-describedby={describedBy('challenge', Boolean(errors.challenge), false)}
+                  required
                   {...register('challenge')}
                 />
               </Field>

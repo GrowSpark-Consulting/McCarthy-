@@ -18,9 +18,13 @@ import {
 /** Longest address allowed by RFC 5321. */
 const MAX_EMAIL_LENGTH = 254;
 
-/** Generous ceilings that still bound the request body. */
+/** Field bounds. */
+const MAX_NAME = 100;
+const MIN_COMPANY = 2;
+const MAX_COMPANY = 150;
 const MAX_SHORT_TEXT = 120;
-const MAX_LONG_TEXT = 2000;
+const MIN_CHALLENGE = 10;
+const MAX_LONG_TEXT = 3000;
 
 /** Trims, and turns an empty string into `undefined` so optionals behave. */
 const optionalText = (max: number) =>
@@ -80,7 +84,7 @@ export const aiAuditRequestSchema = z.object({
     .string()
     .trim()
     .min(2, 'Please enter your full name.')
-    .max(MAX_SHORT_TEXT, 'Please keep your name under 120 characters.'),
+    .max(MAX_NAME, `Please keep your name under ${MAX_NAME} characters.`),
 
   email: z
     .string()
@@ -93,8 +97,8 @@ export const aiAuditRequestSchema = z.object({
   company: z
     .string()
     .trim()
-    .min(1, 'Please enter your company name.')
-    .max(MAX_SHORT_TEXT, 'Please keep this under 120 characters.'),
+    .min(MIN_COMPANY, 'Please enter your company name.')
+    .max(MAX_COMPANY, `Please keep this under ${MAX_COMPANY} characters.`),
 
   jobTitle: optionalText(MAX_SHORT_TEXT),
   website: websiteSchema,
@@ -110,7 +114,11 @@ export const aiAuditRequestSchema = z.object({
     .max(GOAL_OPTIONS.length)
     .default([]),
 
-  challenge: optionalText(MAX_LONG_TEXT),
+  challenge: z
+    .string()
+    .trim()
+    .min(MIN_CHALLENGE, 'Please tell us a little about the challenge — at least 10 characters.')
+    .max(MAX_LONG_TEXT, `Please keep this under ${MAX_LONG_TEXT} characters.`),
   preferredContact: z
     .enum(CONTACT_METHOD_OPTIONS, { error: 'Please choose a contact method.' })
     .default('Email'),

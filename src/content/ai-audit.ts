@@ -61,9 +61,8 @@ export const AUDIT_FORM_COPY = {
   submit: 'Request My AI Audit',
   submitting: 'Submitting…',
   submitted: 'Request Received',
-  successHeading: 'Thank you.',
-  successBody:
-    'We’ve received your AI Audit request and will be in touch shortly. A confirmation email is on its way to the address you gave us.',
+  successHeading: 'Thank you!',
+  successBody: 'We’ve received your AI Audit request and will be in touch shortly.',
   errorHeading: 'That didn’t go through.',
 } as const;
 

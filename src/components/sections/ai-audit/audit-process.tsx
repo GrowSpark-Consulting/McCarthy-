@@ -1,6 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
+
+import { motion, useInView } from 'framer-motion';
 
 import { AUDIT_PROCESS, AUDIT_STAGES } from '@/content/ai-audit';
 import { fadeUp, staggerContainer } from '@/lib/motion';
@@ -14,10 +16,18 @@ const CARD_STAGGER = 0.09;
  * light 32px title, body copy) but as raised cards on the warm surface, which
  * is what separates this page's rhythm from the homepage's flat columns.
  *
- * Cards reveal once on scroll rather than on every pass, and the hover lift is
- * a transform so it stays on the compositor.
+ * Cards reveal once on scroll, and the hover lift is a transform so it stays on
+ * the compositor.
+ *
+ * The reveal is driven by `useInView` feeding the `animate` prop rather than by
+ * `whileInView`: in Framer Motion v13 the gesture prop does not propagate the
+ * variant down to the children, which left every card stuck at `opacity: 0`
+ * after the section had scrolled past.
  */
 export function AuditProcess() {
+  const listRef = useRef<HTMLOListElement>(null);
+  const isInView = useInView(listRef, { once: true, amount: 0.15 });
+
   return (
     <section
       id="audit-process"
@@ -32,10 +42,10 @@ export function AuditProcess() {
         <p className="text-body text-ink mt-5 max-w-[60ch]">{AUDIT_PROCESS.body}</p>
 
         <motion.ol
+          ref={listRef}
           variants={staggerContainer(CARD_STAGGER, 0.05)}
           initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+          animate={isInView ? 'visible' : 'hidden'}
           className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4"
         >
           {AUDIT_STAGES.map((stage) => (

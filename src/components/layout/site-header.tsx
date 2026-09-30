@@ -13,7 +13,7 @@ import { BrandWordmark } from '@/components/shared/brand-wordmark';
 import { ButtonLink } from '@/components/ui/button';
 import { useHeaderScrollState } from '@/hooks/use-header-scroll-state';
 import { DURATION, EASE } from '@/lib/motion';
-import { canPrefetch, PRIMARY_CTA } from '@/lib/navigation';
+import { canPrefetch, hasDarkHero, PRIMARY_CTA } from '@/lib/navigation';
 import { siteConfig } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +59,10 @@ export function SiteHeader() {
   const isMenuOpen = activeOverlay === 'menu';
   const isSearchOpen = activeOverlay === 'search';
 
+  // Over a light page the translucent bar cannot hold contrast for the nav
+  // labels, so it stays solid there.
+  const isSolid = isScrolled || !hasDarkHero(pathname);
+
   return (
     <>
       <motion.header
@@ -72,7 +76,7 @@ export function SiteHeader() {
             'mx-auto flex h-[var(--header-height)] max-w-[120rem] items-center gap-3',
             'rounded-[var(--radius-bar)] px-4 backdrop-blur-xl lg:px-6',
             'transition-[background-color,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out-quint)]',
-            isScrolled ? 'bg-abyss-deep/92 shadow-bar' : 'bg-abyss/55',
+            isSolid ? 'bg-abyss-deep/92 shadow-bar' : 'bg-abyss/55',
           )}
         >
           <Link

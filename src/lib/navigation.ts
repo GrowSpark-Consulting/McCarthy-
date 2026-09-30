@@ -48,6 +48,21 @@ export const PREFETCH_SITE_ROUTES = false;
 const LIVE_ROUTES: ReadonlySet<string> = new Set(['/', '/ai-audit']);
 
 /**
+ * Routes whose hero is dark enough for the header to sit over it as
+ * translucent glass.
+ *
+ * Everywhere else the header uses its solid surface: measured against a white
+ * hero, the translucent bar composites to rgb(117,129,131), which puts the nav
+ * labels at 3.39:1 — below the 4.5:1 WCAG AA needs. Solid restores it.
+ */
+const DARK_HERO_ROUTES: ReadonlySet<string> = new Set(['/']);
+
+/** Whether the header may use its translucent state on this route. */
+export function hasDarkHero(pathname: string): boolean {
+  return DARK_HERO_ROUTES.has(pathname);
+}
+
+/**
  * Prefetch only what resolves. Passing this to `next/link` gives live routes an
  * instant transition without firing 404s for the pages still to come.
  */

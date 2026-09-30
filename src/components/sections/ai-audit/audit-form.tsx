@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -29,6 +29,13 @@ import { aiAuditRequestSchema, type AiAuditFormInput } from '@/lib/validation/ai
 
 /** Where the form posts. */
 const ENDPOINT = '/api/ai-audit';
+
+/**
+ * How long a submission can run before the page says so. Saving writes to the
+ * sheet and sends the admin email, which takes a few seconds; without a word
+ * the wait reads as a hang.
+ */
+const SLOW_HINT_DELAY_MS = 4000;
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -117,6 +124,17 @@ export function AuditForm() {
   );
 
   const isSubmitting = state === 'submitting';
+  const [isSlow, setIsSlow] = useState(false);
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      setIsSlow(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => setIsSlow(true), SLOW_HINT_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [isSubmitting]);
 
   if (state === 'success') {
     return (
@@ -386,6 +404,10 @@ export function AuditForm() {
                 We use this only to prepare for the conversation.
               </p>
             </div>
+
+            <p role="status" aria-live="polite" className="text-ink-muted mt-4 min-h-5 text-sm">
+              {isSlow ? AUDIT_FORM_COPY.stillWorking : ''}
+            </p>
           </form>
         </div>
       </div>

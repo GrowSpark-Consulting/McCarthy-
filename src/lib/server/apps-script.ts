@@ -9,47 +9,54 @@ import type { AiAuditRequest } from '@/lib/validation/ai-audit';
  *
  * Apps Script owns everything Google-side: it writes the row to the sheet and
  * sends the admin notification through Gmail under the script owner's account.
- * That means this app holds no Google credentials at all — only the deployment
- * URL, and only on the server.
+ * This app holds no Google credentials — only the deployment URL, server-side.
  *
- * How a web app call works, and why it is done by hand here:
+ * A web app call is two hops, made by hand here rather than with `fetch`:
  *
- * 1. POST to `/exec`. Apps Script runs `doPost` — the row is written and the
- *    email sent — then answers `302` pointing at `script.googleusercontent.com`.
+ * 1. POST to `/exec`. Apps Script runs `doPost` to completion — row written,
+ *    email sent — and only then answers `302` to script.googleusercontent.com.
  * 2. GET that location to read what `doPost` returned.
  *
- * Hop 2 was measured failing intermittently: over IPv6 it returned `404` on 3
- * of 5 attempts from a network where IPv4 succeeded 5 of 5. A plain `fetch`
- * follows the redirect on whichever route it gets and would report a failure
- * for a lead that had already been saved. So both hops prefer IPv4, and hop 2
- * — a read of stored output, safe to repeat — is retried. Hop 1 is never
- * retried once it may have reached Google, so a retry cannot create a second
- * row or a second email.
+ * Measured against the live deployment from a network with an unstable route
+ * to Google, hop 2 failed intermittently (404 over IPv6, stalls over IPv4)
+ * while the row had already been saved. Treating that as a failure showed the
+ * visitor an error for a lead that was in the sheet, invited a duplicate
+ * resubmission, and spent ~20s on retries first. So:
+ *
+ * - The redirect to the content host is itself proof that `doPost` ran.
+ * - Hop 2 gets one short attempt. If it answers, its verdict stands —
+ *   including `success: false`. If it cannot be read, the submission is
+ *   accepted on the strength of the redirect, and a warning is logged.
+ * - Hop 1 is retried only when the connection fails before the request is
+ *   sent, so no retry can write a second row or send a second email.
+ *
+ * On a healthy network (Vercel) hop 2 answers in ~0.5s and its verdict is
+ * always read.
  */
 
 const APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
 
+/** Establishing TCP + TLS. Nothing has been sent yet, so a stall here is safe to retry. */
+const CONNECT_TIMEOUT_MS = 6_000;
+
 /**
- * Hop 1 includes the script's own execution — opening the sheet, appending the
- * row, sending the Gmail — and the first run after a new version is a cold
- * start. Measured over 10s, so it gets a far longer ceiling than a plain read.
+ * Waiting for `doPost` to finish once the request is sent. Measured at ~9s on
+ * the first run after a new version (a cold start that opens the sheet and
+ * sends mail), shorter when warm.
  */
-const SUBMIT_TIMEOUT_MS = 30_000;
+const SUBMIT_RESPONSE_TIMEOUT_MS = 30_000;
 
-/** Hop 2 only reads stored output, so a stall there is a network problem. */
-const RESULT_TIMEOUT_MS = 8_000;
+/** Reading the stored reply. Short on purpose — see the module docs. */
+const RESULT_TIMEOUT_MS = 4_000;
 
-/** Attempts at reading the result (hop 2). */
-const RESULT_ATTEMPTS = 3;
+/** Connection attempts for hop 1, every one of them before anything is sent. */
+const SUBMIT_CONNECT_ATTEMPTS = 3;
 
-/** Base backoff between result reads; grows linearly per attempt. */
-const RESULT_RETRY_DELAY_MS = 400;
+/** Redirects followed within the hop 2 read. */
+const MAX_REDIRECTS = 2;
 
-/** Hard cap on redirects within a single read. */
-const MAX_REDIRECTS = 3;
-
-/** Errors meaning "no IPv4 route here" — the only case hop 1 may retry. */
-const NO_IPV4_ROUTE = new Set(['ENETUNREACH', 'EHOSTUNREACH', 'EADDRNOTAVAIL', 'EAI_ADDRFAMILY']);
+/** Where Apps Script sends the caller once `doPost` has returned. */
+const RESULT_HOST = 'script.googleusercontent.com';
 
 export function isAppsScriptConfigured(): boolean {
   return Boolean(APPS_SCRIPT_URL);
@@ -74,16 +81,25 @@ export interface AppsScriptPayload {
 interface AppsScriptResponse {
   readonly success?: boolean;
   readonly message?: string;
+  /** False when the row was saved but the admin email could not be sent. */
+  readonly notified?: boolean;
+}
+
+/** The result of a submission the script accepted. */
+export interface SubmissionOutcome {
+  /** True when the script's own reply was read; false when accepted on the redirect alone. */
+  readonly confirmed: boolean;
+  /** Whether the admin email went out. Unknown when the reply was not read. */
+  readonly notified: boolean | null;
 }
 
 /**
  * Maps the validated form request onto the Apps Script contract.
  *
  * Optional fields become empty strings rather than being omitted, so the sheet
- * always receives the same twelve columns in the same order.
- *
- * No timestamp is sent: Apps Script generates it server-side, because a
- * browser-supplied time cannot be trusted.
+ * always receives the same twelve columns in the same order. No timestamp is
+ * sent: Apps Script generates it, because a browser-supplied time cannot be
+ * trusted.
  */
 export function toAppsScriptPayload(data: AiAuditRequest): AppsScriptPayload {
   return {
@@ -112,18 +128,35 @@ interface SendOptions {
   readonly body?: string;
   /** 4 pins IPv4; 0 lets the OS choose. */
   readonly family: 0 | 4;
-  readonly timeoutMs: number;
+  readonly connectTimeoutMs: number;
+  readonly responseTimeoutMs: number;
 }
 
-/** One HTTPS request, no redirect following, bounded by `timeoutMs`. */
-function send(url: string, { method, body, family, timeoutMs }: SendOptions): Promise<RawResponse> {
+/** A failure raised before the TLS handshake completed — nothing was sent. */
+class NotSentError extends Error {
+  override readonly name = 'NotSentError';
+}
+
+/**
+ * One HTTPS request on a fresh connection, no redirect following.
+ *
+ * A fresh connection (`agent: false`) is what makes the connect phase
+ * observable: the handshake always happens, so a failure before it completes
+ * is known not to have sent anything and is raised as `NotSentError`.
+ */
+function send(
+  url: string,
+  { method, body, family, connectTimeoutMs, responseTimeoutMs }: SendOptions,
+): Promise<RawResponse> {
   return new Promise((resolve, reject) => {
+    let connected = false;
+
     const req = request(
       url,
       {
         method,
         family,
-        timeout: timeoutMs,
+        agent: false,
         headers: body
           ? {
               // Apps Script web apps reject an unexpected CORS preflight;
@@ -148,133 +181,177 @@ function send(url: string, { method, body, family, timeoutMs }: SendOptions): Pr
       },
     );
 
-    req.on('timeout', () => req.destroy(new Error(`Apps Script request timed out (${method})`)));
-    req.on('error', reject);
+    const connectTimer = setTimeout(() => {
+      req.destroy(
+        new NotSentError(`Could not connect to Apps Script within ${connectTimeoutMs}ms`),
+      );
+    }, connectTimeoutMs);
 
-    if (body) {
-      req.write(body);
-    }
+    req.on('socket', (socket) => {
+      socket.once('secureConnect', () => {
+        connected = true;
+        clearTimeout(connectTimer);
+        req.setTimeout(responseTimeoutMs, () =>
+          req.destroy(new Error(`Apps Script did not respond within ${responseTimeoutMs}ms`)),
+        );
+      });
+    });
 
-    req.end();
+    req.on('error', (error) => {
+      clearTimeout(connectTimer);
+      reject(connected || error instanceof NotSentError ? error : new NotSentError(error.message));
+    });
+
+    req.end(body);
   });
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
- * Hop 1. Pinned to IPv4; falls back to the OS default only when IPv4 has no
- * route at all — a failure raised before any byte left the machine, so the
- * retry cannot duplicate a submission.
+ * Hop 1. Retried only on `NotSentError`, alternating the address family so an
+ * unhealthy route is not tried three times over. Any failure after the request
+ * may have reached Google is final — repeating it could duplicate the row.
  */
 async function postSubmission(body: string): Promise<RawResponse> {
-  try {
-    return await send(APPS_SCRIPT_URL as string, {
-      method: 'POST',
-      body,
-      family: 4,
-      timeoutMs: SUBMIT_TIMEOUT_MS,
-    });
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
+  let lastError: unknown;
 
-    if (code && NO_IPV4_ROUTE.has(code)) {
-      return send(APPS_SCRIPT_URL as string, {
-        method: 'POST',
-        body,
-        family: 0,
-        timeoutMs: SUBMIT_TIMEOUT_MS,
-      });
-    }
-
-    throw error;
-  }
-}
-
-/**
- * Hop 2. Reads the stored `doPost` result, following up to `MAX_REDIRECTS`
- * further redirects, and retrying on anything other than a 200. The final
- * attempt lets the OS pick the route, so an IPv6-only host still works.
- */
-async function readResult(location: string): Promise<RawResponse> {
-  let lastFailure: unknown = new Error('Apps Script result was never read');
-
-  for (let attempt = 1; attempt <= RESULT_ATTEMPTS; attempt += 1) {
-    const family = attempt < RESULT_ATTEMPTS ? 4 : 0;
-    let target = location;
+  for (let attempt = 1; attempt <= SUBMIT_CONNECT_ATTEMPTS; attempt += 1) {
+    const family = attempt % 2 === 1 ? 4 : 0;
 
     try {
-      for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
-        const response = await send(target, {
-          method: 'GET',
-          family,
-          timeoutMs: RESULT_TIMEOUT_MS,
-        });
-
-        if (response.status === 200) {
-          return response;
-        }
-
-        if (response.status >= 300 && response.status < 400 && response.location) {
-          target = response.location;
-          continue;
-        }
-
-        lastFailure = new Error(`Apps Script result returned ${response.status}`);
-        break;
-      }
+      return await send(APPS_SCRIPT_URL as string, {
+        method: 'POST',
+        body,
+        family,
+        connectTimeoutMs: CONNECT_TIMEOUT_MS,
+        responseTimeoutMs: SUBMIT_RESPONSE_TIMEOUT_MS,
+      });
     } catch (error) {
-      lastFailure = error;
-    }
+      lastError = error;
 
-    if (attempt < RESULT_ATTEMPTS) {
-      await sleep(RESULT_RETRY_DELAY_MS * attempt);
+      if (!(error instanceof NotSentError)) {
+        throw error;
+      }
     }
   }
 
-  throw lastFailure;
+  throw lastError;
+}
+
+/** Hop 2. One short attempt; `null` when the reply could not be read. */
+async function readResult(location: string): Promise<RawResponse | null> {
+  let target = location;
+
+  try {
+    for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
+      const response = await send(target, {
+        method: 'GET',
+        family: 4,
+        connectTimeoutMs: RESULT_TIMEOUT_MS,
+        responseTimeoutMs: RESULT_TIMEOUT_MS,
+      });
+
+      if (response.status === 200) {
+        return response;
+      }
+
+      if (response.status >= 300 && response.status < 400 && response.location) {
+        target = response.location;
+        continue;
+      }
+
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return '';
+  }
+}
+
+/** Turns the script's reply into an outcome, or throws for a rejection. */
+function interpret(body: string): SubmissionOutcome {
+  let parsed: AppsScriptResponse;
+
+  try {
+    parsed = JSON.parse(body) as AppsScriptResponse;
+  } catch {
+    // HTML here almost always means the deployment is not public, the new
+    // version is not authorized yet, or the URL is not the /exec endpoint.
+    throw new Error(`Apps Script returned a non-JSON body: ${body.slice(0, 160)}`);
+  }
+
+  if (parsed.success !== true) {
+    throw new Error(`Apps Script rejected the submission: ${parsed.message ?? 'no message'}`);
+  }
+
+  return { confirmed: true, notified: parsed.notified ?? null };
 }
 
 /**
- * Posts the submission to Apps Script and reports whether it was accepted.
+ * Posts the submission to Apps Script.
  *
- * Throws on transport failure, a non-2xx outcome, an unparseable body, or
- * `success: false`. Callers translate that into the generic message the
+ * Resolves when the script accepted it; throws when it was rejected or never
+ * reached the script. Callers translate a throw into the generic message the
  * visitor sees — Google's own error text never reaches the browser.
  */
-export async function submitToAppsScript(payload: AppsScriptPayload): Promise<void> {
+export async function submitToAppsScript(payload: AppsScriptPayload): Promise<SubmissionOutcome> {
   if (!APPS_SCRIPT_URL) {
     throw new Error('GOOGLE_APPS_SCRIPT_URL is not set');
   }
 
   const first = await postSubmission(JSON.stringify(payload));
 
-  const isRedirect = first.status >= 300 && first.status < 400 && Boolean(first.location);
-  const final = isRedirect ? await readResult(first.location as string) : first;
+  if (first.status >= 300 && first.status < 400 && first.location) {
+    const host = hostOf(first.location);
 
-  if (final.status !== 200) {
-    throw new Error(`Apps Script responded ${final.status}`);
+    // Anywhere else — accounts.google.com above all — means the deployment is
+    // not public and `doPost` never ran.
+    if (host !== RESULT_HOST) {
+      throw new Error(
+        `Apps Script redirected to ${host || 'an invalid URL'}; check its access setting`,
+      );
+    }
+
+    const result = await readResult(first.location);
+
+    if (!result) {
+      console.warn(
+        '[ai-audit] doPost ran (redirected to the result host) but its reply could not be read; ' +
+          'accepting the submission. Check the sheet and the Apps Script Executions log.',
+      );
+      return { confirmed: false, notified: null };
+    }
+
+    return interpret(result.body);
   }
 
-  let parsed: AppsScriptResponse;
-
-  try {
-    parsed = JSON.parse(final.body) as AppsScriptResponse;
-  } catch {
-    // An HTML body here almost always means the deployment is private, or the
-    // URL is the editor's rather than the /exec endpoint.
-    throw new Error(`Apps Script returned a non-JSON body: ${final.body.slice(0, 160)}`);
+  if (first.status === 200) {
+    return interpret(first.body);
   }
 
-  if (parsed.success !== true) {
-    throw new Error(`Apps Script rejected the submission: ${parsed.message ?? 'no message'}`);
-  }
+  throw new Error(`Apps Script responded ${first.status}`);
+}
+
+/** The deployment's `doGet` reply. Writes nothing. */
+export interface HealthReport {
+  readonly status: number;
+  readonly body: string;
 }
 
 /**
- * Reads the deployment's `doGet` health check. Writes nothing — safe to call
- * against any deployment to confirm which script is behind the URL.
+ * Reads the deployment's `doGet` health check, which reports the script
+ * version and whether it is authorized to send email. Safe against any
+ * deployment.
  */
-export async function checkAppsScriptHealth(): Promise<{ status: number; body: string }> {
+export async function checkAppsScriptHealth(): Promise<HealthReport> {
   if (!APPS_SCRIPT_URL) {
     throw new Error('GOOGLE_APPS_SCRIPT_URL is not set');
   }
@@ -282,12 +359,14 @@ export async function checkAppsScriptHealth(): Promise<{ status: number; body: s
   const first = await send(APPS_SCRIPT_URL, {
     method: 'GET',
     family: 4,
-    timeoutMs: SUBMIT_TIMEOUT_MS,
+    connectTimeoutMs: CONNECT_TIMEOUT_MS,
+    responseTimeoutMs: SUBMIT_RESPONSE_TIMEOUT_MS,
   });
-  const final =
-    first.status >= 300 && first.status < 400 && first.location
-      ? await readResult(first.location)
-      : first;
 
-  return { status: final.status, body: final.body };
+  if (first.status >= 300 && first.status < 400 && first.location) {
+    const result = await readResult(first.location);
+    return result ?? { status: 502, body: 'Health reply could not be read' };
+  }
+
+  return { status: first.status, body: first.body };
 }

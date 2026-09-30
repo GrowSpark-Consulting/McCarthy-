@@ -60,6 +60,8 @@ export const AUDIT_FORM_COPY = {
   body: 'Tell us a little about your organization and we’ll use it to prepare for the conversation.',
   submit: 'Request My AI Audit',
   submitting: 'Submitting…',
+  stillWorking:
+    'Still working — saving your request can take up to 15 seconds. Please keep this page open.',
   submitted: 'Request Received',
   successHeading: 'Thank you!',
   successBody: 'We’ve received your AI Audit request and will be in touch shortly.',

@@ -6,6 +6,7 @@ import {
   isAppsScriptConfigured,
   submitToAppsScript,
   toAppsScriptPayload,
+  type SubmissionOutcome,
 } from '@/lib/server/apps-script';
 import { clientIpFrom, rateLimit, releaseRateLimit } from '@/lib/server/rate-limit';
 import { aiAuditRequestSchema, type AiAuditRequest } from '@/lib/validation/ai-audit';
@@ -139,8 +140,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     return fail(500, { success: false, message: DELIVERY_FAILURE_MESSAGE });
   }
 
+  let outcome: SubmissionOutcome;
+
   try {
-    await submitToAppsScript(toAppsScriptPayload(data));
+    outcome = await submitToAppsScript(toAppsScriptPayload(data));
   } catch (error) {
     console.error('[ai-audit] Apps Script delivery failed', error);
 
@@ -153,6 +156,21 @@ export async function POST(request: Request): Promise<NextResponse> {
     await releaseRateLimit(`dupe:${fingerprint}`);
 
     return fail(500, { success: false, message: DELIVERY_FAILURE_MESSAGE });
+  }
+
+  // The lead is saved in both of these cases, so the visitor still sees
+  // success; what they flag is for whoever maintains the site.
+  if (outcome.notified === false) {
+    console.error(
+      '[ai-audit] lead saved, but the admin notification email failed. ' +
+        'Open the Apps Script, then Executions, for the reason.',
+    );
+  }
+
+  if (!outcome.confirmed) {
+    console.warn(
+      '[ai-audit] lead accepted without reading the script reply; verify it in the sheet.',
+    );
   }
 
   return NextResponse.json({ success: true, message: 'AI Audit request received successfully' });

@@ -30,6 +30,12 @@ const SHEET_NAME = 'AI Audit';
  */
 const ADMIN_EMAILS = ['growspark@gmail.com', 'admin@growsparkconsulting.com'];
 
+/**
+ * Bumped whenever this file changes. The health check reports it, so the site
+ * (and you) can confirm which version a deployment is actually running.
+ */
+const VERSION = '2026-09-30.3';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Below this line nothing needs changing.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -65,50 +71,121 @@ const LIMITS = {
 /**
  * Entry point for the web app.
  *
- * Returns JSON in every case. Internal error detail is logged and never
- * returned to the caller.
+ * Returns JSON in every case. Internal error detail is logged (visible under
+ * Executions in the editor) and never returned to the caller.
+ *
+ * Saving and notifying are separate steps with separate outcomes:
+ *
+ * - If the row cannot be saved, the lead is lost, so the reply is a failure
+ *   and the website asks the visitor to try again.
+ * - If the row is saved but the email fails, the lead is safe. Reporting that
+ *   as a failure would make the visitor resubmit and create a duplicate row,
+ *   so the reply is a success with `notified: false`, and the website logs it.
  */
 function doPost(e) {
+  var data;
+
   try {
     if (!e || !e.postData || !e.postData.contents) {
       return jsonResponse(false, 'Unable to process the request');
     }
 
-    var data = JSON.parse(e.postData.contents);
-    var errors = validate(data);
-
-    if (errors.length > 0) {
-      Logger.log('Validation failed: ' + errors.join('; '));
-      return jsonResponse(false, 'Unable to process the request');
-    }
-
-    // Server-side timestamp. A browser-supplied time is not trusted.
-    var now = new Date();
-    var timezone = Session.getScriptTimeZone();
-
-    appendRow(data, now, timezone);
-    notifyAdmin(data, now, timezone);
-
-    return jsonResponse(true, 'AI Audit request received successfully');
+    data = JSON.parse(e.postData.contents);
   } catch (error) {
-    Logger.log('doPost failed: ' + error);
+    console.error('doPost: unreadable body: ' + error);
     return jsonResponse(false, 'Unable to process the request');
   }
+
+  var errors = validate(data);
+
+  if (errors.length > 0) {
+    console.error('doPost: validation failed: ' + errors.join('; '));
+    return jsonResponse(false, 'Unable to process the request');
+  }
+
+  // Server-side timestamp. A browser-supplied time is not trusted.
+  var now = new Date();
+  var timezone = Session.getScriptTimeZone();
+
+  try {
+    appendRow(data, now, timezone);
+  } catch (error) {
+    console.error('doPost: could not save the row: ' + error);
+    return jsonResponse(false, 'Unable to process the request');
+  }
+
+  var notified = true;
+
+  try {
+    notifyAdmin(data, now, timezone);
+  } catch (error) {
+    notified = false;
+    console.error('doPost: row saved, but the admin email failed: ' + error);
+  }
+
+  return jsonResponse(true, 'AI Audit request received successfully', { notified: notified });
 }
 
 /**
- * A GET on the deployment URL is useful for confirming the web app is live
- * without writing a row.
+ * Health check. Opening the deployment URL in a browser shows this without
+ * writing a row. It reports only what is needed to confirm the deployment is
+ * the right one and able to send — never the recipient addresses themselves.
  */
 function doGet() {
-  return jsonResponse(true, 'AI Audit endpoint is live');
+  var quota = null;
+
+  try {
+    quota = MailApp.getRemainingDailyQuota();
+  } catch (error) {
+    // Most often: the new version has not been authorized to send email yet.
+    console.error('doGet: email not authorized: ' + error);
+  }
+
+  return jsonResponse(true, 'AI Audit endpoint is live', {
+    version: VERSION,
+    recipients: ADMIN_EMAILS.length,
+    emailAuthorized: quota !== null,
+    emailQuotaRemaining: quota,
+  });
 }
 
-/** Builds the JSON reply. */
-function jsonResponse(success, message) {
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: success, message: message }),
-  ).setMimeType(ContentService.MimeType.JSON);
+/**
+ * Run this once from the editor (choose it in the toolbar, then Run) after
+ * pasting a new version. It triggers Google's permission prompt, then sends a
+ * test email to every ADMIN_EMAILS address, so you can confirm delivery
+ * without submitting the form.
+ */
+function sendTestEmail() {
+  var recipients = ADMIN_EMAILS.join(',');
+
+  MailApp.sendEmail(recipients, 'McCarthy AI Audit — test email', [
+    'This is a test from the McCarthy AI Audit Apps Script.',
+    '',
+    'If you can read this, AI Audit notifications will reach this inbox.',
+    '',
+    'Script version: ' + VERSION,
+  ].join('\n'), { name: 'McCarthy Website' });
+
+  console.log(
+    'Test email sent to ' + recipients + '. Emails left today: ' + MailApp.getRemainingDailyQuota(),
+  );
+}
+
+/** Builds the JSON reply, with optional extra fields. */
+function jsonResponse(success, message, extra) {
+  var payload = { success: success, message: message };
+
+  if (extra) {
+    for (var key in extra) {
+      if (Object.prototype.hasOwnProperty.call(extra, key)) {
+        payload[key] = extra[key];
+      }
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
 }
 
 /** Trims any value into a string. */
@@ -267,7 +344,7 @@ function notifyAdmin(data, now, timezone) {
     submitted,
   ];
 
-  GmailApp.sendEmail(ADMIN_EMAILS.join(','), 'New AI Audit Request — ' + company, lines.join('\n'), {
+  MailApp.sendEmail(ADMIN_EMAILS.join(','), 'New AI Audit Request — ' + company, lines.join('\n'), {
     name: 'McCarthy Website',
     replyTo: text(data.email),
     htmlBody: buildHtml(data, goals, submitted),

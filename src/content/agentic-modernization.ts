@@ -29,11 +29,13 @@ export interface TrendArticle {
   readonly title: string;
   readonly body: string;
   readonly link: LinkRef;
+  readonly image?: string;
 }
 
 export interface CustomerStory {
   readonly title: string;
   readonly link: LinkRef;
+  readonly image?: string;
 }
 
 export interface Capability {
@@ -123,16 +125,19 @@ export const AMOD_TRENDS = {
       title: 'A decision-maker’s guide to the agentic AI era',
       body: 'Understand why traditional approaches fail and what enterprises should be doing instead.',
       link: { label: 'Read the article', href: '/insights/agentic-ai-decision-makers-guide' },
+      image: '/img/agentic01.png',
     },
     {
       title: 'AI-native modernization for industry-specific operations',
       body: 'Learn why traditional modernization breaks down and how organizations can take a more focused approach across manufacturing, logistics, financial services and other complex environments.',
       link: { label: 'Read the article', href: '/insights/ai-native-modernization-by-industry' },
+      image: '/img/agentic03.png',
     },
     {
       title: 'From strategy to practice: scaling agentic modernization',
       body: 'McCarthy research exploring what separates organizations that successfully scale agentic AI from those that remain stuck in experimentation.',
       link: { label: 'Read the report', href: '/insights/scaling-agentic-modernization' },
+      image: '/img/agentic02.png',
     },
   ] satisfies readonly TrendArticle[],
 } as const;
@@ -148,10 +153,12 @@ export const AMOD_CUSTOMER_SUCCESS = {
     {
       title: 'Accelerating operational intelligence with McCarthy AI',
       link: { label: 'Read the customer story', href: '/insights' },
+      image: '/img/Accelerating%20operational.png',
     },
     {
       title: 'McCarthy helps a growing enterprise modernize critical workflows with governed AI',
       link: { label: 'Read the customer story', href: '/insights' },
+      image: '/img/enterprise%20modernize%20critical.png',
     },
   ] satisfies readonly CustomerStory[],
 } as const;

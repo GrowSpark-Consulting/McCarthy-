@@ -274,13 +274,19 @@ this header row:
 **2. Add the script.** In that spreadsheet: **Extensions → Apps Script**. Paste
 the contents of `google-apps-script/ai-audit.gs`.
 
-**3. Configure the three values at the top:**
+**3. Configure the values at the top.** `ADMIN_EMAILS` is already set to the two
+GrowSpark addresses; only the sheet id needs filling in:
 
 ```javascript
 const SPREADSHEET_ID = 'YOUR_GOOGLE_SHEET_ID'; // the id in the sheet URL, between /d/ and /edit
 const SHEET_NAME = 'AI Audit'; // must match the tab name
-const ADMIN_EMAIL = 'you@yourdomain.com'; // the ONLY address ever emailed
+const ADMIN_EMAILS = ['growspark@gmail.com', 'admin@growsparkconsulting.com']; // the ONLY addresses ever emailed
 ```
+
+**Share the data with the second account.** The sheet lives in whichever
+account creates it. Open it, click **Share**, add the other address as
+**Editor**. Both then see every submission, and both receive every
+notification.
 
 **4. Deploy.** Save, then **Deploy → New deployment → Web app** with:
 
@@ -296,12 +302,16 @@ GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/XXXXXXXX/exec
 ```
 
 **6. Verify.** Submit the form, then check: one new row in the sheet, one email
-to `ADMIN_EMAIL`, no email to the address submitted, and the success state on
+addressed to both `ADMIN_EMAILS`, no email to the address submitted, and the success state on
 the page.
 
 Opening the `/exec` URL in a browser returns `{"success":true,"message":"AI
 Audit endpoint is live"}` — a quick way to confirm the deployment without
 writing a row.
+
+**Notification quota:** each submission sends one email to two recipients,
+and Google counts recipients. A free Gmail owner allows 100 recipients a
+day — about 50 submissions — while Google Workspace allows 1,500.
 
 **Re-deploying:** after editing the script, use **Deploy → Manage deployments →
 edit → New version**. Creating a _new deployment_ instead issues a different

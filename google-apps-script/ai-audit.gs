@@ -23,8 +23,12 @@ const SPREADSHEET_ID = 'YOUR_GOOGLE_SHEET_ID';
 /** The tab the rows are appended to. Must match the tab name exactly. */
 const SHEET_NAME = 'AI Audit';
 
-/** Who receives the notification. This is the ONLY address ever emailed. */
-const ADMIN_EMAIL = 'your-admin-email@gmail.com';
+/**
+ * Who receives the notification. These are the ONLY addresses ever emailed.
+ * Each submission sends one email addressed to all of them. Add or remove
+ * addresses here; nothing else needs changing.
+ */
+const ADMIN_EMAILS = ['growspark@gmail.com', 'admin@growsparkconsulting.com'];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Below this line nothing needs changing.
@@ -192,7 +196,7 @@ function appendRow(data, now, timezone) {
 }
 
 /**
- * Sends exactly one email, to ADMIN_EMAIL.
+ * Sends exactly one email, addressed to every entry in ADMIN_EMAILS.
  *
  * The submitter's address is used only as the reply-to, so hitting Reply in
  * Gmail answers them directly — it is never a recipient.
@@ -263,7 +267,7 @@ function notifyAdmin(data, now, timezone) {
     submitted,
   ];
 
-  GmailApp.sendEmail(ADMIN_EMAIL, 'New AI Audit Request — ' + company, lines.join('\n'), {
+  GmailApp.sendEmail(ADMIN_EMAILS.join(','), 'New AI Audit Request — ' + company, lines.join('\n'), {
     name: 'McCarthy Website',
     replyTo: text(data.email),
     htmlBody: buildHtml(data, goals, submitted),

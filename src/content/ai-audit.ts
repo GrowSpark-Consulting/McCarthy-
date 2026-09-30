@@ -11,7 +11,6 @@ export const AUDIT_HERO = {
   heading: 'Find where AI can create real value in your business.',
   body: 'Get a practical assessment of your workflows, technology, and operations to identify where AI can improve efficiency, reduce costs, and unlock new opportunities.',
   primary: { label: 'Book Your AI Audit', href: '#audit-form' },
-  secondary: { label: 'Talk to an Expert', href: '/contact' },
   /** Signals shown in the hero's diagram panel. */
   signals: [
     { label: 'Workflows mapped', value: 'End to end' },

@@ -71,10 +71,6 @@ export function AuditHero() {
               {AUDIT_HERO.primary.label}
               <span aria-hidden="true">→</span>
             </ButtonLink>
-
-            <ButtonLink href={AUDIT_HERO.secondary.href} variant="outline">
-              {AUDIT_HERO.secondary.label}
-            </ButtonLink>
           </motion.div>
         </motion.div>
 

@@ -1,5 +1,6 @@
+import Image from 'next/image';
+
 import { ArrowLink } from '@/components/shared/arrow-link';
-import { PlaceholderFrame } from '@/components/shared/placeholder-frame';
 import { TypeBreak } from '@/components/shared/type-break';
 import { ButtonLink } from '@/components/ui/button';
 import { EXPERTISE } from '@/content/homepage';
@@ -11,7 +12,8 @@ import { PREFETCH_SITE_ROUTES } from '@/lib/navigation';
  * The reference's feature is a large portrait beside an attributed executive
  * quote. McCarthy has no verified spokesperson, so the same composition carries
  * an unattributed market observation in McCarthy's own voice — no invented
- * person, no invented title — and the portrait slot stays a marked placeholder.
+ * person, no invented title — beside a photograph of the Singapore market it
+ * describes.
  */
 export function Expertise() {
   return (
@@ -35,10 +37,15 @@ export function Expertise() {
         </div>
 
         <div className="mt-12 grid lg:mt-16 lg:grid-cols-[minmax(0,877fr)_minmax(0,563fr)]">
-          <PlaceholderFrame
-            label="Feature photography"
-            className="aspect-[16/10] lg:aspect-auto lg:min-h-[31.25rem]"
-          />
+          <div className="relative aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[31.25rem]">
+            <Image
+              src={EXPERTISE.feature.image.src}
+              alt={EXPERTISE.feature.image.alt}
+              fill
+              sizes="(min-width: 1024px) 66vw, 100vw"
+              className="object-cover"
+            />
+          </div>
 
           <div className="bg-surface-warm flex flex-col justify-center gap-6 p-8 lg:p-12">
             <h3 className="text-h3 text-ink max-w-[22ch]">{EXPERTISE.feature.heading}</h3>

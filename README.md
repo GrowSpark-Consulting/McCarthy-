@@ -215,6 +215,66 @@ Posters were generated from a mid-clip frame of each source.
 Recommended encode for replacements: H.264 MP4, 1920x1080, 6-20s seamless loop,
 **no audio track**, 2-4 Mbps, `-movflags +faststart`.
 
+## 10. AI Audit page
+
+`/ai-audit` is the destination of the header's "Book an AI Audit" CTA.
+
+### Structure
+
+| File                                                 | Role                                          |
+| ---------------------------------------------------- | --------------------------------------------- |
+| `src/app/ai-audit/page.tsx`                          | Route, metadata, JSON-LD, section composition |
+| `src/components/sections/ai-audit/audit-hero.tsx`    | Hero + original workflow diagram              |
+| `src/components/sections/ai-audit/audit-process.tsx` | Four stage cards                              |
+| `src/components/sections/ai-audit/audit-form.tsx`    | Consultation form                             |
+| `src/components/ui/field.tsx`                        | Form primitives on the existing token set     |
+| `src/lib/validation/ai-audit.ts`                     | zod schema shared by browser and server       |
+| `src/app/api/ai-audit/route.ts`                      | `POST /api/ai-audit`                          |
+| `src/lib/server/google-sheets.ts`                    | Sheets append via service-account JWT         |
+| `src/lib/server/email.ts`                            | Notification + confirmation email             |
+| `src/lib/server/rate-limit.ts`                       | Upstash REST, with in-process fallback        |
+
+### Request pipeline
+
+Body size check → JSON parse → zod (which also enforces the honeypot) → rate
+limit (5 per IP per 10 min) → duplicate suppression (same email + company +
+challenge within 3 min) → Sheets append → notification and confirmation email.
+
+The Sheets write decides success. If a lead is recorded but email fails, the
+request still succeeds and the failure is logged — a captured lead with a
+missing notification is recoverable, a lost lead is not.
+
+### Google Sheet setup
+
+1. Create a spreadsheet and a tab named `AI Audit` (or set `GOOGLE_SHEETS_TAB_NAME`).
+2. Add this header row, in this order:
+
+   `Timestamp | Name | Email | Company | Job Title | Website | Industry | Company Size | Goals | Challenge | Preferred Contact | Additional Information`
+
+3. Create a Google Cloud service account, enable the Google Sheets API, and
+   download its JSON key.
+4. Share the spreadsheet with the service account's email as **Editor**.
+5. Set `GOOGLE_SHEETS_CLIENT_EMAIL`, `GOOGLE_SHEETS_PRIVATE_KEY` and
+   `GOOGLE_SHEETS_SPREADSHEET_ID` (see `.env.example`).
+
+Rows are appended with `valueInputOption=RAW`, so a company size of `1–10`
+stays text instead of being coerced into a date.
+
+### Email setup
+
+Resend over HTTP — no SDK, no SMTP dependency. Set `RESEND_API_KEY`,
+`EMAIL_FROM` (a domain verified in Resend) and `AI_AUDIT_NOTIFICATION_EMAIL`.
+Replies to the team notification go to the person who submitted. To use another
+provider, change `deliver()` in `src/lib/server/email.ts`; nothing else knows
+who sends the mail.
+
+### Running without credentials
+
+In development, with neither Sheets nor email configured, the route logs the
+submission and returns success, so the full client experience is testable
+locally. In production the same state returns 503 rather than silently
+discarding a lead.
+
 ## 10. Known follow-ups
 
 1. `PREFETCH_SITE_ROUTES` in `src/lib/navigation.ts` is `false` while the

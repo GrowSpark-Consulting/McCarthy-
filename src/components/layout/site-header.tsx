@@ -13,7 +13,7 @@ import { BrandWordmark } from '@/components/shared/brand-wordmark';
 import { ButtonLink } from '@/components/ui/button';
 import { useHeaderScrollState } from '@/hooks/use-header-scroll-state';
 import { DURATION, EASE } from '@/lib/motion';
-import { PREFETCH_SITE_ROUTES, PRIMARY_CTA } from '@/lib/navigation';
+import { canPrefetch, PRIMARY_CTA } from '@/lib/navigation';
 import { siteConfig } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
@@ -88,7 +88,7 @@ export function SiteHeader() {
           <div className="ml-auto flex items-center gap-2">
             <ButtonLink
               href={PRIMARY_CTA.href}
-              prefetch={PREFETCH_SITE_ROUTES}
+              prefetch={canPrefetch(PRIMARY_CTA.href)}
               aria-label={PRIMARY_CTA.ariaLabel ?? PRIMARY_CTA.label}
               variant="verde"
               shape="pill"

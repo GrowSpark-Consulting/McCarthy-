@@ -40,9 +40,20 @@ export const PRIMARY_NAV: readonly NavLink[] = [
  *
  * The destinations above ship phase by phase. Until they exist, Next would
  * prefetch every visible link on load and take a 404 for each one, so
- * prefetching is off; set it to `true` once the pages are live.
+ * prefetching is off by default; `canPrefetch` opts in the routes that exist.
  */
 export const PREFETCH_SITE_ROUTES = false;
+
+/** Routes that are actually built. Add each page here as it ships. */
+const LIVE_ROUTES: ReadonlySet<string> = new Set(['/', '/ai-audit']);
+
+/**
+ * Prefetch only what resolves. Passing this to `next/link` gives live routes an
+ * instant transition without firing 404s for the pages still to come.
+ */
+export function canPrefetch(href: string): boolean {
+  return LIVE_ROUTES.has(href);
+}
 
 /** Header call to action. */
 export const PRIMARY_CTA: NavCta = {

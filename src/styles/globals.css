@@ -53,6 +53,13 @@
   --color-verde-bright: #4cdd84;
   --color-verde-ink: #042315;
 
+  /* ---- Form state ---------------------------------------------------------
+     The reference has no form UI to measure, so these are the two semantic
+     colours the design system was missing. Both clear 4.5:1 on the canvas and
+     on the warm surface. */
+  --color-danger: #b3261e;
+  --color-success: #1b7f4c;
+
   /* ---- Dark hero --------------------------------------------------------- */
   --color-abyss: #04191d;
   --color-abyss-deep: #010b0e;

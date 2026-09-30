@@ -18,7 +18,7 @@
  * The spreadsheet's id: the long string in its URL, between /d/ and /edit.
  * https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit
  */
-const SPREADSHEET_ID = '19xkUNBQ6KgSYn2QM9YJpT10QOVS9VWO3RoYjUXNisKE';
+const SPREADSHEET_ID = 'YOUR_GOOGLE_SHEET_ID';
 
 /** The tab the rows are appended to. Must match the tab name exactly. */
 const SHEET_NAME = 'AI Audit';

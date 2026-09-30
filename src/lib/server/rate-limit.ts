@@ -121,6 +121,29 @@ export async function rateLimit(
 }
 
 /**
+ * Gives a claim back, so the next attempt with the same identifier is let
+ * through. Used to un-claim a duplicate-suppression fingerprint when delivery
+ * fails; otherwise the visitor's retry would be mistaken for a double click.
+ */
+export async function releaseRateLimit(identifier: string): Promise<void> {
+  const key = `ratelimit:ai-audit:${identifier}`;
+
+  memoryWindows.delete(key);
+
+  if (UPSTASH_URL && UPSTASH_TOKEN) {
+    try {
+      await fetch(`${UPSTASH_URL}/del/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
+        cache: 'no-store',
+      });
+    } catch (error) {
+      console.error('[ai-audit] could not release rate limit key', error);
+    }
+  }
+}
+
+/**
  * Best-effort client IP.
  *
  * Trusts `x-forwarded-for` because the app is expected to sit behind Vercel's

@@ -29,8 +29,15 @@ import type { AiAuditRequest } from '@/lib/validation/ai-audit';
 
 const APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
 
-/** Per-request ceiling. Apps Script cold starts can take several seconds. */
-const HOP_TIMEOUT_MS = 10_000;
+/**
+ * Hop 1 includes the script's own execution — opening the sheet, appending the
+ * row, sending the Gmail — and the first run after a new version is a cold
+ * start. Measured over 10s, so it gets a far longer ceiling than a plain read.
+ */
+const SUBMIT_TIMEOUT_MS = 30_000;
+
+/** Hop 2 only reads stored output, so a stall there is a network problem. */
+const RESULT_TIMEOUT_MS = 8_000;
 
 /** Attempts at reading the result (hop 2). */
 const RESULT_ATTEMPTS = 3;
@@ -105,17 +112,18 @@ interface SendOptions {
   readonly body?: string;
   /** 4 pins IPv4; 0 lets the OS choose. */
   readonly family: 0 | 4;
+  readonly timeoutMs: number;
 }
 
-/** One HTTPS request, no redirect following, bounded by `HOP_TIMEOUT_MS`. */
-function send(url: string, { method, body, family }: SendOptions): Promise<RawResponse> {
+/** One HTTPS request, no redirect following, bounded by `timeoutMs`. */
+function send(url: string, { method, body, family, timeoutMs }: SendOptions): Promise<RawResponse> {
   return new Promise((resolve, reject) => {
     const req = request(
       url,
       {
         method,
         family,
-        timeout: HOP_TIMEOUT_MS,
+        timeout: timeoutMs,
         headers: body
           ? {
               // Apps Script web apps reject an unexpected CORS preflight;
@@ -160,12 +168,22 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 async function postSubmission(body: string): Promise<RawResponse> {
   try {
-    return await send(APPS_SCRIPT_URL as string, { method: 'POST', body, family: 4 });
+    return await send(APPS_SCRIPT_URL as string, {
+      method: 'POST',
+      body,
+      family: 4,
+      timeoutMs: SUBMIT_TIMEOUT_MS,
+    });
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
 
     if (code && NO_IPV4_ROUTE.has(code)) {
-      return send(APPS_SCRIPT_URL as string, { method: 'POST', body, family: 0 });
+      return send(APPS_SCRIPT_URL as string, {
+        method: 'POST',
+        body,
+        family: 0,
+        timeoutMs: SUBMIT_TIMEOUT_MS,
+      });
     }
 
     throw error;
@@ -186,7 +204,11 @@ async function readResult(location: string): Promise<RawResponse> {
 
     try {
       for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects += 1) {
-        const response = await send(target, { method: 'GET', family });
+        const response = await send(target, {
+          method: 'GET',
+          family,
+          timeoutMs: RESULT_TIMEOUT_MS,
+        });
 
         if (response.status === 200) {
           return response;
@@ -257,7 +279,11 @@ export async function checkAppsScriptHealth(): Promise<{ status: number; body: s
     throw new Error('GOOGLE_APPS_SCRIPT_URL is not set');
   }
 
-  const first = await send(APPS_SCRIPT_URL, { method: 'GET', family: 4 });
+  const first = await send(APPS_SCRIPT_URL, {
+    method: 'GET',
+    family: 4,
+    timeoutMs: SUBMIT_TIMEOUT_MS,
+  });
   const final =
     first.status >= 300 && first.status < 400 && first.location
       ? await readResult(first.location)

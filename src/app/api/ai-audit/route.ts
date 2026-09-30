@@ -7,7 +7,7 @@ import {
   submitToAppsScript,
   toAppsScriptPayload,
 } from '@/lib/server/apps-script';
-import { clientIpFrom, rateLimit } from '@/lib/server/rate-limit';
+import { clientIpFrom, rateLimit, releaseRateLimit } from '@/lib/server/rate-limit';
 import { aiAuditRequestSchema, type AiAuditRequest } from '@/lib/validation/ai-audit';
 
 export const runtime = 'nodejs';
@@ -143,6 +143,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     await submitToAppsScript(toAppsScriptPayload(data));
   } catch (error) {
     console.error('[ai-audit] Apps Script delivery failed', error);
+
+    // Release the fingerprint so the visitor's retry is actually delivered.
+    // Kept, it would make that retry look like a double click and answer
+    // "success" without sending anything, silently losing the lead. The cost
+    // is that a timeout after the script had already written the row can
+    // produce a second row on retry, and a duplicate is recoverable where a
+    // lost lead is not.
+    await releaseRateLimit(`dupe:${fingerprint}`);
+
     return fail(500, { success: false, message: DELIVERY_FAILURE_MESSAGE });
   }
 

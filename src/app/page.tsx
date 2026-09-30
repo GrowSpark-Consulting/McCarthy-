@@ -15,6 +15,9 @@ import { SectionTabs } from '@/components/sections/section-tabs';
 import { TrustPanels } from '@/components/sections/trust-panels';
 import { WhoWeAre } from '@/components/sections/who-we-are';
 
+/** The news strip reads from Sanity; ISR safety net alongside webhook revalidation. */
+export const revalidate = 60;
+
 /**
  * McCarthy homepage.
  *

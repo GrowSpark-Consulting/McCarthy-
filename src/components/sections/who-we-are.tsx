@@ -1,18 +1,18 @@
+import Image from 'next/image';
+
 import { ArrowLink } from '@/components/shared/arrow-link';
 import { Eyebrow } from '@/components/shared/eyebrow';
-import { ButtonLink } from '@/components/ui/button';
 import { WHO_WE_ARE } from '@/content/homepage';
-import { PREFETCH_SITE_ROUTES } from '@/lib/navigation';
 
 /**
  * Section 5 — the who-we-are split.
  *
  * Measured from the reference: a ~445px copy column on the left and an ember
- * panel filling the rest (853x490 at 1440), with the brand line centred in it
- * and a 2px-bordered Watch button pinned to the panel's lower left.
+ * panel filling the rest (853x490 at 1440), with the brand line set small in
+ * its top-left corner.
  *
- * The film itself does not exist yet, so the button points at the page that
- * will host it rather than opening an empty player.
+ * The panel carries the "We are McCarthy" photograph under a dark scrim so
+ * the wordmark stays legible; the ember fill shows while it loads.
  */
 export function WhoWeAre() {
   return (
@@ -39,22 +39,23 @@ export function WhoWeAre() {
           </ul>
         </div>
 
-        <div className="bg-ember relative flex min-h-[22rem] flex-col justify-between p-8 lg:min-h-[30.625rem] lg:p-10">
-          <p className="text-ink-inverse flex flex-1 items-center justify-center text-center text-[clamp(2rem,1.2rem+2.6vw,3.25rem)] leading-[1.1] font-light">
+        <div className="group bg-ember relative isolate aspect-[4/3] overflow-hidden p-5 sm:aspect-[16/9] sm:p-7 lg:aspect-auto lg:min-h-[30.625rem] lg:p-9">
+          <Image
+            src={WHO_WE_ARE.panel.image.src}
+            alt={WHO_WE_ARE.panel.image.alt}
+            fill
+            sizes="(min-width: 1024px) 64vw, 100vw"
+            className="-z-20 object-cover object-[62%_center] transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 bg-linear-to-br from-black/55 via-black/10 to-transparent"
+          />
+
+          <p className="text-ink-inverse text-[clamp(1.125rem,0.95rem+0.8vw,1.625rem)] leading-[1.15] font-light [text-shadow:0_1px_16px_rgb(0_0_0/0.4)]">
             {WHO_WE_ARE.panel.wordmark}
             <span aria-hidden="true">.</span>
           </p>
-
-          <ButtonLink
-            href={WHO_WE_ARE.panel.action.href}
-            prefetch={PREFETCH_SITE_ROUTES}
-            variant="outline-inverse"
-            shape="control"
-            size="compact"
-            className="w-fit border-2 font-semibold"
-          >
-            {WHO_WE_ARE.panel.action.label}
-          </ButtonLink>
         </div>
       </div>
     </section>

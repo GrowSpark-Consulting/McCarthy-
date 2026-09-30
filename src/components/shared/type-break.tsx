@@ -42,7 +42,7 @@ export function TypeBreak({
           'type-break',
           variant === 'ghost'
             ? 'text-break'
-            : 'text-center text-[clamp(2.25rem,0.6rem+6.6vw,6rem)] leading-[1.05] font-light normal-case',
+            : 'text-center text-[clamp(2rem,0.6rem+6.6vw,6rem)] leading-[1.05] font-light normal-case',
           TONE_CLASS[tone],
         )}
       >

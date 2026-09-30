@@ -6,9 +6,8 @@ import { AbstractTile } from '@/components/shared/abstract-tile';
 import { AMOD_CUSTOMER_SUCCESS } from '@/content/agentic-modernization';
 
 /**
- * Customer success — two story cards. The first reuses the existing
- * abstract wave footage (real, already-approved asset); the second is an
- * `AbstractTile`, since no second photo exists. Titles are explicit
+ * Customer success — two story cards on a soft warm surface, each topped with
+ * its photograph (an `AbstractTile` stands in if a story has none). Titles are explicit
  * placeholders (see `content/agentic-modernization.ts`), so a small note
  * says so rather than letting a fabricated customer outcome read as real.
  */
@@ -19,12 +18,15 @@ export function CustomerSuccess() {
         <h2 className="text-h2-soft text-ink max-w-[26ch]">{AMOD_CUSTOMER_SUCCESS.heading}</h2>
 
         <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-8 lg:mt-16">
-          {AMOD_CUSTOMER_SUCCESS.stories.map((story, index) => (
-            <article key={story.title} className="flex flex-col">
-              {index === 0 ? (
-                <div className="relative aspect-[16/10] overflow-hidden rounded-[var(--radius-panel)]">
+          {AMOD_CUSTOMER_SUCCESS.stories.map((story) => (
+            <article
+              key={story.title}
+              className="bg-surface-warm flex flex-col overflow-hidden rounded-[var(--radius-panel)]"
+            >
+              {story.image ? (
+                <div className="relative aspect-[3/2] overflow-hidden rounded-[var(--radius-panel)]">
                   <Image
-                    src="/videos/wave-loop-poster.jpg"
+                    src={story.image}
                     alt=""
                     fill
                     sizes="(min-width: 768px) 50vw, 100vw"
@@ -32,13 +34,15 @@ export function CustomerSuccess() {
                   />
                 </div>
               ) : (
-                <AbstractTile icon={Workflow} tone="verde" className="aspect-[16/10] rounded-[var(--radius-panel)]" />
+                <AbstractTile icon={Workflow} tone="verde" className="aspect-[3/2] rounded-[var(--radius-panel)]" />
               )}
 
-              <h3 className="text-h3-lg text-ink mt-6 max-w-[26ch]">{story.title}</h3>
+              <div className="flex flex-1 flex-col p-6 sm:p-8 lg:px-12 lg:pt-10 lg:pb-12">
+                <h3 className="text-h3-lg text-ink max-w-[26ch]">{story.title}</h3>
 
-              <div className="mt-6">
-                <ArrowLink href={story.link.href}>{story.link.label}</ArrowLink>
+                <div className="mt-6">
+                  <ArrowLink href={story.link.href}>{story.link.label}</ArrowLink>
+                </div>
               </div>
             </article>
           ))}

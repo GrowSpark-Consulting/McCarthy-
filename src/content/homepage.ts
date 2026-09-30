@@ -60,6 +60,10 @@ export const WHO_WE_ARE = {
   ],
   panel: {
     wordmark: 'We are McCarthy',
+    image: {
+      src: '/img/we%20are%20mccarthy.png',
+      alt: 'McCarthy team reviewing an AI strategy dashboard above the Singapore skyline',
+    },
     action: { label: 'Watch', href: '/about/film' },
   },
 } as const;
@@ -134,6 +138,8 @@ export interface Capability {
   readonly title: string;
   readonly body: string;
   readonly link: LinkRef;
+  /** Revealed beside the numeral when the step is hovered on desktop. */
+  readonly image: string;
 }
 
 /** Section 11 — the four-column numbered capability grid. */
@@ -143,24 +149,28 @@ export const CAPABILITIES: readonly Capability[] = [
     title: 'Discover',
     body: 'Understand the business, the people, the technology and the organisation’s real AI readiness before anything is built.',
     link: { label: 'Book an assessment', href: '/ai-audit' },
+    image: '/img/01.png',
   },
   {
     index: '02',
     title: 'Design',
     body: 'Map the opportunities, prioritise the use cases that carry commercial weight, and define the architecture behind them.',
     link: { label: 'See our approach', href: '/about/approach' },
+    image: '/img/02.png',
   },
   {
     index: '03',
     title: 'Build',
     body: 'AI agents, automation, applications and knowledge systems, engineered to production standards rather than demo standards.',
     link: { label: 'Explore AI Solutions', href: '/ai-solutions' },
+    image: '/img/03.png',
   },
   {
     index: '04',
     title: 'Adopt',
     body: 'Train the people, establish the governance, and embed AI into everyday work so the capability outlives the project.',
     link: { label: 'Explore AI Workforce', href: '/ai-workforce' },
+    image: '/img/04.png',
   },
 ];
 
@@ -175,6 +185,10 @@ export const AI_NATIVE_PROMO = {
   heading: 'Unlock the power of being AI-native',
   body: 'AI-native organisations don’t just use more AI tools — they embed intelligence into the way work happens.',
   link: { label: 'See your AI-native advantage', href: '/about/ai-native' },
+  image: {
+    src: '/img/unlock%20power%20of%20ai.png',
+    alt: 'McCarthy team working with AI dashboards above the Singapore skyline',
+  },
 } as const;
 
 export interface Article {
@@ -182,6 +196,12 @@ export interface Article {
   readonly title: string;
   readonly body: string;
   readonly link: LinkRef;
+  readonly image: {
+    readonly src: string;
+    readonly alt: string;
+    /** Zoom that crops a white margin baked into the file itself. */
+    readonly trim?: number;
+  };
 }
 
 /** Section 13 — published insight articles. */
@@ -191,18 +211,31 @@ export const ARTICLES: readonly Article[] = [
     title: 'Your AI strategy should start with the business, not the model',
     body: 'Model choice is the last decision, not the first. The work that determines whether AI pays back is understanding where the business actually loses time, money and margin.',
     link: { label: 'Read the article', href: '/insights/ai-strategy-starts-with-the-business' },
+    image: {
+      src: '/img/ai_strategy_article_artwork.png',
+      alt: 'Business leader looking out over the Singapore skyline beside a rising growth chart',
+    },
   },
   {
     eyebrow: 'AI agents',
     title: 'The shift from AI that answers to AI that acts',
     body: 'Agents change the question from “what can it tell me” to “what can it do” — and that changes how systems have to be designed, governed and trusted.',
     link: { label: 'Read the article', href: '/insights/from-answers-to-actions' },
+    image: {
+      src: '/img/the%20shift%20from%20ai.png',
+      alt: 'Professional working alongside an AI assistant robot as agent steps appear on screen',
+    },
   },
   {
     eyebrow: 'Automation',
     title: 'Don’t automate a broken process',
     body: 'Automation makes a process faster, not better. Fix the workflow first, then let the machine run it.',
     link: { label: 'Read the article', href: '/insights/dont-automate-a-broken-process' },
+    image: {
+      src: '/img/dont%20automate%20broken%20proccess.png',
+      alt: 'Analyst mapping a workflow with an AI assistant before automating it',
+      trim: 1.1,
+    },
   },
 ];
 
@@ -228,6 +261,10 @@ export const EXPERTISE = {
       'Singapore is one of the fastest-growing AI adoption markets in APAC — most organisations still don’t know where to start',
     body: 'That’s the gap McCarthy exists to close: turning AI ambition into prioritised, engineered, adopted systems.',
     action: { label: 'Read our approach', href: '/about/approach' },
+    image: {
+      src: '/img/Singapore%20is%20one%20of%20the%20fastest-growing%20AI%20adoption.png',
+      alt: 'Team mapping an AI roadmap in a Singapore office overlooking Marina Bay',
+    },
   },
 } as const;
 
@@ -259,6 +296,10 @@ export const PARTNERS = {
 /** Section 20 — careers split. */
 export const CAREERS = {
   panel: { wordmark: 'McCarthy' },
+  image: {
+    src: '/img/Small%20team.%20Real%20ownership.png',
+    alt: 'McCarthy team planning an AI strategy on a whiteboard in a Singapore office',
+  },
   blocks: [
     {
       heading: 'Small team. Real ownership.',

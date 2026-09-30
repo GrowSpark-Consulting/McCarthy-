@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -31,6 +31,18 @@ export function TrustPanels() {
 
   const step = (delta: number) =>
     setActiveIndex((current) => (current + delta + TRUST_PANELS.length) % TRUST_PANELS.length);
+
+  // Hover opens a strip too (mouse only, so touch keeps tap-to-open). A short
+  // intent delay stops strips flicking open as the cursor passes across them.
+  const hoverTimer = useRef<number | undefined>(undefined);
+  const cancelHover = () => window.clearTimeout(hoverTimer.current);
+  const hoverTo = (event: PointerEvent, index: number) => {
+    if (event.pointerType !== 'mouse') return;
+    cancelHover();
+    hoverTimer.current = window.setTimeout(() => setActiveIndex(index), 120);
+  };
+
+  useEffect(() => cancelHover, []);
 
   return (
     <section aria-labelledby="trust-heading" className="bg-canvas pb-[var(--section-py)]">
@@ -72,17 +84,23 @@ export function TrustPanels() {
               return (
                 <div
                   key={panel.index}
+                  onPointerEnter={(event) => hoverTo(event, index)}
+                  onPointerLeave={cancelHover}
                   className={cn(
                     'relative flex min-w-0 flex-col overflow-hidden transition-[flex-grow] duration-[var(--duration-slow)] ease-[var(--ease-out-expo)]',
                     TONE_CLASS[panel.tone],
                     isActive ? 'lg:grow-[10]' : 'lg:grow',
                   )}
                 >
+                  {/* Fills the whole strip so any point in the column selects it; the
+                      panel link below sits above it and keeps its own click. */}
                   <button
                     type="button"
                     aria-expanded={isActive}
+                    aria-label={`Go to slide ${index + 1}: ${panel.title}`}
+                    aria-describedby={`trust-panel-body-${index}`}
                     onClick={() => setActiveIndex(index)}
-                    className="flex w-full flex-col items-start gap-6 p-8 text-left lg:p-10"
+                    className="focus-visible:outline-ink-inverse flex w-full cursor-pointer flex-col items-start gap-6 p-8 text-left focus-visible:outline-2 focus-visible:-outline-offset-4 lg:flex-1 lg:p-10"
                   >
                     <span
                       aria-hidden="true"
@@ -100,7 +118,10 @@ export function TrustPanels() {
                       <span className="text-h3-solid text-ink-inverse max-w-[22ch]">
                         {panel.title}
                       </span>
-                      <span className="text-body text-ink-inverse/85 max-w-[46ch]">
+                      <span
+                        id={`trust-panel-body-${index}`}
+                        className="text-body text-ink-inverse/85 max-w-[46ch]"
+                      >
                         {panel.body}
                       </span>
                     </span>

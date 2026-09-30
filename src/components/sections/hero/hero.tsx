@@ -16,7 +16,9 @@ const CAROUSEL_VIEWPORT_ID = 'hero-carousel-viewport';
  *
  * Measured against the reference at 1440x900: 804px tall (~89svh), copy
  * bottom-anchored with a 146px gap down to the dots and 22px from the dots to
- * the hero's bottom edge. The floating header sits over the top of it.
+ * the hero's bottom edge. The floating header sits over the top of it; the
+ * top padding keeps the copy clear of it, so on short viewports the hero grows
+ * rather than sliding the headline under the bar.
  *
  * Drag, dot selection and left/right arrows all move the carousel; autoplay
  * pauses on hover and focus, and never starts under reduced motion.
@@ -61,7 +63,7 @@ export function Hero() {
       aria-roledescription="carousel"
       aria-label="McCarthy highlights"
       onKeyDown={handleKeyDown}
-      className="group/hero relative isolate flex h-[var(--hero-height)] min-h-[34rem] w-full flex-col justify-end overflow-hidden"
+      className="group/hero relative isolate flex min-h-[max(var(--hero-height),34rem)] w-full flex-col justify-end overflow-hidden pt-[calc(var(--header-band)+2rem)]"
     >
       <HeroBackdrop />
 

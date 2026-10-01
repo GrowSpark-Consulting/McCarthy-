@@ -11,6 +11,12 @@ interface SectionTabsProps {
   readonly tabs?: readonly LinkRef[];
   /** Accessible name, for pages that carry more than one tab set. */
   readonly label?: string;
+  /**
+   * Pill surface. `glass` (default) is the homepage's white glass; `warm`
+   * sets it on the site's warm grey, for pages whose reference shows the
+   * pill as a solid tinted bar.
+   */
+  readonly surface?: 'glass' | 'warm';
 }
 
 /** Fraction of the viewport used as the "current section" line. */
@@ -28,7 +34,11 @@ const ACTIVE_LINE_RATIO = 0.35;
  * Scrolling is handed to Lenis when it is running so the jump matches the rest
  * of the page's motion, with a native fallback under reduced motion.
  */
-export function SectionTabs({ tabs = SECTION_TABS, label = 'Page sections' }: SectionTabsProps) {
+export function SectionTabs({
+  tabs = SECTION_TABS,
+  label = 'Page sections',
+  surface = 'glass',
+}: SectionTabsProps) {
   const [activeId, setActiveId] = useState<string>(() => (tabs[0]?.href ?? '#').replace('#', ''));
   const lenis = useSmoothScroll();
 
@@ -78,7 +88,10 @@ export function SectionTabs({ tabs = SECTION_TABS, label = 'Page sections' }: Se
     <div className="pointer-events-none sticky top-[calc(var(--header-band)+0.5rem)] z-40 flex justify-center px-[var(--page-gutter)]">
       <nav
         aria-label={label}
-        className="border-white/65 bg-white/88 shadow-tabs pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 backdrop-blur-[14px]"
+        className={cn(
+          'shadow-tabs pointer-events-auto flex max-w-full items-center gap-1 overflow-x-auto rounded-full border p-1.5 backdrop-blur-[14px]',
+          surface === 'warm' ? 'border-white/70 bg-surface-warm/92' : 'border-white/65 bg-white/88',
+        )}
       >
         {tabs.map((tab) => {
           const id = tab.href.replace('#', '');
@@ -95,7 +108,10 @@ export function SectionTabs({ tabs = SECTION_TABS, label = 'Page sections' }: Se
                 'transition-colors duration-[var(--duration-base)] ease-[var(--ease-out-quint)]',
                 isActive
                   ? 'bg-ink-strong text-ink-inverse'
-                  : 'text-ink hover:bg-surface-warm hover:text-ink-strong',
+                  : cn(
+                      'text-ink hover:text-ink-strong',
+                      surface === 'warm' ? 'hover:bg-canvas' : 'hover:bg-surface-warm',
+                    ),
               )}
             >
               {tab.label}
